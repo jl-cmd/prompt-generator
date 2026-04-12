@@ -17,6 +17,10 @@ This copies skills, hooks, and rules into `~/.claude/`.
 - **hooks/blocking/** — Prompt workflow gate and validation hooks
 - **rules/** — Prompt workflow context controls
 
+## Issues
+
+Bugs, feature requests, and pull requests are welcome at https://github.com/jl-cmd/prompt-generator/issues.
+
 ## License
 
 MIT
