@@ -1,0 +1,78 @@
+{
+  "skill_name": "agent-prompt",
+  "source": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#evaluation-and-iteration",
+  "depends_on": "skills/prompt-generator/SKILL.md",
+  "trigger_queries": "skills/agent-prompt/evals/agent-prompt-triggers.json",
+  "evals": [
+    {
+      "id": 1,
+      "name": "pg_then_execution_gate",
+      "scenario": "Happy path",
+      "prompt": "/agent-prompt Add a failing test for packages/claude-dev-env/hooks/blocking/prompt_workflow_validate.py exit code 2 messages, then minimal code to pass. Use TDD.",
+      "files": [],
+      "expected_behavior": [
+        "Orchestrator runs prompt-generator end-to-end before any execution spawn: discovery and AskUserQuestion behave per skills/prompt-generator/SKILL.md; Outcome preview gate appears; final user-visible handoff includes one xml-tagged fence with the full prompt artifact plus ## Outcome digest per TARGET_OUTPUT.md",
+        "After that handoff, exactly one AskUserQuestion presents execution approval with subagent type and mode taken from the live host tool schema (see skills/agent-prompt/REFERENCE.md), kebab-case name, and that the subagent prompt will be the finalized XML",
+        "AskUserQuestion options include Launch it (recommended), Edit first, and Cancel; Launch it and Edit first previews follow skills/agent-prompt/SKILL.md",
+        "On Launch it, Agent or Task tool runs with run_in_background true and prompt parameter equal to the approved XML string from the Launch preview without summarization",
+        "No second prompt refinement pipeline outside prompt-generator’s own internal flow"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "no_spawn_without_approval",
+      "scenario": "Safety",
+      "prompt": "/agent-prompt Run a quick docs pass on skills/prompt-generator/TARGET_OUTPUT.md and open a draft PR.",
+      "files": ["skills/prompt-generator/TARGET_OUTPUT.md"],
+      "expected_behavior": [
+        "No background Agent or Task spawn for execution occurs before the post-handoff AskUserQuestion resolves with Launch it",
+        "If the user chose Cancel, no execution spawn; if Edit first, orchestrator returns to execution AskUserQuestion after edits without launching on stale XML"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "edit_first_then_launch",
+      "scenario": "Approval loop",
+      "prompt": "/agent-prompt Draft a minimal XML handoff for continuing work on skills/agent-prompt/SKILL.md. [After the assistant shows the xml fence and ## Outcome digest, the user says:] Edit first — remove the optional guardrail bullet from the XML. [Then:] Launch it.",
+      "files": ["skills/agent-prompt/SKILL.md"],
+      "expected_behavior": [
+        "No execution spawn before the post-handoff AskUserQuestion",
+        "After Edit first, the assistant shows revised XML (or confirms the edit) and returns to Step 2 AskUserQuestion before spawning",
+        "On Launch it, the spawned subagent prompt matches the post-edit XML from the Launch preview, not the pre-edit version"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "artifact_only_routing",
+      "scenario": "Wrong skill",
+      "prompt": "/prompt-generator Write a handoff XML so a new session can continue refactoring hooks only—no subagent execution.",
+      "files": [],
+      "expected_behavior": [
+        "If agent-prompt skill is active but the user invoked /prompt-generator and asked for artifact only, the assistant follows skills/prompt-generator/SKILL.md and does not add agent-prompt’s post-handoff execution AskUserQuestion or a background spawn",
+        "No execution spawn at the end of the turn sequence"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "trivial_task_inline",
+      "scenario": "Scope",
+      "prompt": "/agent-prompt Is skills/agent-prompt/evals/agent-prompt.json valid JSON? Answer yes or no.",
+      "files": ["skills/agent-prompt/evals/agent-prompt.json"],
+      "expected_behavior": [
+        "Assistant completes the check inline or states the task is too small for prompt-generator plus subagent delegation, per SKILL.md When to stay inline",
+        "No background subagent spawn for this trivial verification unless the user explicitly demands the full workflow anyway"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "slash_arguments_are_pg_goal",
+      "scenario": "Invocation",
+      "prompt": "/agent-prompt Summarize skills/agent-prompt/REFERENCE.md in five bullets for onboarding.",
+      "files": ["skills/agent-prompt/REFERENCE.md"],
+      "expected_behavior": [
+        "Text after /agent-prompt is treated as the user goal fed into prompt-generator when the full workflow runs",
+        "If the full workflow runs, the execution subagent receives the approved fenced XML from the prompt-generator handoff, not merely the slash line"
+      ]
+    }
+  ]
+}

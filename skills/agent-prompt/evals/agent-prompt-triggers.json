@@ -1,0 +1,28 @@
+{
+  "skill_name": "agent-prompt",
+  "purpose": "Description and routing checks per skill-builder polish-skill (train/test splits in skill-creator). Each query is a realistic user message.",
+  "should_trigger": [
+    "/agent-prompt Refactor skills/prompt-generator/SKILL.md so the Outcome preview gate cannot be skipped; run tests under packages/claude-dev-env/hooks/blocking/ after.",
+    "Launch a background agent to implement the plan we just agreed on—use the XML prompt from the last message and delegate execution.",
+    "Spawn an explore agent to map where TARGET_OUTPUT.md is referenced across this repo, then summarize findings in a PR description.",
+    "I want this done in the background: take the fenced handoff XML I pasted and run it in a subagent with run_in_background true.",
+    "Delegate this to an agent: add evals for the agent-prompt skill and push a draft PR to jl-cmd/prompt-generator.",
+    "Run this in background via Task tool—goal is TDD fix for prompt_workflow_validate.py stderr format, use the prompt-generator flow first then execute.",
+    "/agent-prompt After /prompt-generator ships my xml, I need you to actually execute that prompt with a generalPurpose subagent—walk me through approval first.",
+    "Execute the paste-ready XML from the previous turn with a subagent; I already confirmed the Outcome preview for that prompt.",
+    "delegate this: same as last /prompt-generator output but have a subagent do the implementation work in skills/agent-prompt/",
+    "spawn agent to do X where X is: read skills/agent-prompt/evals/agent-prompt.json and confirm id 1 still matches SKILL.md wording"
+  ],
+  "should_not_trigger": [
+    "/prompt-generator Write a system prompt for a lint agent; I only need the xml fence and digest, no subagent run.",
+    "Improve the wording in skills/agent-prompt/SKILL.md only—single-file edit, no delegation.",
+    "Just tell me if agent-prompt.json is valid JSON; one shell command is enough.",
+    "Run pytest on packages/claude-dev-env/hooks/blocking/ and paste failures—I'll fix inline in this chat.",
+    "What does TARGET_OUTPUT.md say about the Outcome digest? Quote the section only.",
+    "Create a draft PR description for my staged README change—no agents, no prompt-generator run.",
+    "/prompt-generator Scenario 2 handoff for continuing theme export work—I will paste this into a new session myself.",
+    "Search the repo for 'AskUserQuestion' and list files; grep-level task.",
+    "Explain the difference between /prompt-generator and /agent-prompt in two bullet points—documentation only.",
+    "Use /skill-writer to tighten my personal skill's description; do not spawn a Task subagent."
+  ]
+}
