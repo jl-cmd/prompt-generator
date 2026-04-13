@@ -1,0 +1,10 @@
+name: push-smoke
+on:
+  push:
+    branches:
+      - main
+jobs:
+  echo:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "push trigger ok"
