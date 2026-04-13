@@ -20,6 +20,7 @@
         "hooks/HOOK_SPECS_PROMPT_WORKFLOW.md",
         "rules/prompt-workflow-context-controls.md",
         "README.md",
+        "CHANGELOG.md",
         "LICENSE"
     ],
     "keywords": [
@@ -32,5 +33,8 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/jl-cmd/prompt-generator.git"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

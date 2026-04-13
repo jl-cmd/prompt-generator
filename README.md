@@ -80,6 +80,18 @@ Tool name mapping for shared hook tooling (same source):
 | `WebFetch` | — | No |
 | `WebSearch` | — | No |
 
+## Releases (maintainers)
+
+This repo uses [Release Please](https://github.com/googleapis/release-please) ([action](https://github.com/googleapis/release-please-action)) on **`main`**:
+
+1. Land commits in [Conventional Commits](https://www.conventionalcommits.org/) form (`feat:`, `fix:`, `feat!:` for breaking, etc.).
+2. Release Please opens or updates a **release PR** (changelog + version bump in `package.json`).
+3. **Merge that PR** when you want to ship. The workflow then creates a **GitHub Release** and runs **`npm publish`** for `@jl-cmd/prompt-generator`.
+
+**Required:** add an **`NPM_TOKEN`** repository secret (npm granular access token with **Publish** for this package).
+
+**Optional:** use a **PAT** instead of `GITHUB_TOKEN` for the Release Please step if release PRs must trigger other workflows ([GitHub limitation](https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow) on `GITHUB_TOKEN`-created events).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
