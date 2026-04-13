@@ -33,15 +33,15 @@ Authors a repository-grounded XML prompt: discovery, `AskUserQuestion`, drafting
 
 Runs the **same** prompt-generator flow through that final handoff (discovery → preview → fenced XML + digest). Refinement, validation, and preview rounds live entirely inside prompt-generator; agent-prompt starts after that handoff.
 
-After the handoff, it sends **one** execution `AskUserQuestion` (**Launch it**, **Edit first**, **Cancel**). On **Launch it**, it spawns a background Agent/Task with `run_in_background: true` and `prompt` set to the **approved XML text verbatim** (the execution payload for a new context).
+After the handoff, it sends **one** execution `AskUserQuestion` (**Launch it**, **Edit first**, **Cancel**). On **Launch it**, it spawns a background Agent/Task with `run_in_background: true` and `prompt` set to the **approved XML** from the preview (full content, no summarization—the execution payload for a new context).
 
-Typical `subagent_type` / `mode` pairing:
+Typical **logical** role → **Cursor Task** `subagent_type` mapping (always confirm against your live tool schema—see `skills/agent-prompt/REFERENCE.md`):
 
 | Task type | subagent_type | mode |
 | --- | --- | --- |
 | Codebase exploration, search, research | `explore` | default |
-| Code implementation, bug fix, refactoring | `general-purpose` | auto |
-| Read-only audit, analysis, review | `general-purpose` | default |
+| Code implementation, bug fix, refactoring | `generalPurpose` | auto |
+| Read-only audit, analysis, review | `generalPurpose` | default |
 | Architecture, multi-step planning | `plan` | plan |
 
 Use `/prompt-generator` when only the artifact is needed; use `/agent-prompt` when the user wants a subagent to execute after approval.

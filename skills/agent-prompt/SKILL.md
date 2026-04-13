@@ -1,27 +1,33 @@
 ---
 name: agent-prompt
+argument-hint: "[goal or brief — becomes the prompt-generator user goal]"
 description: >-
-  Runs the full prompt-generator workflow, then spawns a background subagent whose task
-  is the user-approved XML from that handoff. Use for /agent-prompt, delegated work, or
-  background execution after a paste-ready prompt exists. Do not select when the user only
-  wants the prompt artifact with no subagent run (/prompt-generator). Triggers: launch or
-  spawn an agent, delegate this, run in background, execute the prompt with an agent.
+  Runs the prompt-generator workflow through its paste-ready XML handoff, then spawns
+  a background subagent whose task is that user-approved XML. Triggers: '/agent-prompt',
+  'launch an agent', 'spawn agent to do X', 'delegate this', 'run in background',
+  'execute the prompt with an agent'. Does not apply when the user only needs the
+  fenced prompt and digest with no subagent (/prompt-generator).
 ---
-
-@packages/claude-dev-env/skills/prompt-generator/SKILL.md
-@packages/claude-dev-env/skills/prompt-generator/REFERENCE.md
 
 # Agent prompt
 
+**Capability:** One end-to-end behavior — **handoff-quality XML via prompt-generator**, explicit execution approval, then **background** delegation using that XML alone as the subagent task. Not a second prompt author.
+
+**Arguments:** Treat `$ARGUMENTS` (text after `/agent-prompt`) as the **goal string** for prompt-generator, then run the workflow below.
+
 ## Summary
 
-- Run **`prompt-generator` first** through its final handoff (same contract as `TARGET_OUTPUT.md`). The execution subagent **does not** see this conversation; only the fenced XML carries state, so paraphrasing or skipping steps drops scope, validation, and compliance signals.
-- **Then** one execution `AskUserQuestion`, then spawn with `run_in_background: true` and `prompt` = approved XML only.
-- **Slash text** after `/agent-prompt` is the goal string for `prompt-generator`, then the steps below.
+- **Step 1** loads and follows the sibling **`prompt-generator`** skill (read `../prompt-generator/SKILL.md` from this skill directory, or see `REFERENCE.md` for repo-root equivalents). The execution subagent does **not** see this thread; only the fenced XML carries enough state. Paraphrasing or skipping prompt-generator drops scope and validation.
+- **Step 2** is one execution `AskUserQuestion`. **Step 3** spawns with `run_in_background: true` and the **approved XML** as `prompt` (see `REFERENCE.md` for host tool enum mapping).
 
 ## Evaluation
 
-Grade behavior against `evals/agent-prompt.json` (three scenarios: happy path, no spawn without approval, edit-first loop). Add or tighten eval rows when you change this skill; do not expand SKILL.md without updating evals (see [Anthropic: evaluation and iteration](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#evaluation-and-iteration)).
+| Asset | Purpose |
+|-------|---------|
+| `evals/agent-prompt.json` | Behavior scenarios (happy path, safety, edit loop, routing, trivial task) |
+| `evals/agent-prompt-triggers.json` | Should-trigger / should-not-trigger phrases for description tuning (skill-builder polish) |
+
+When changing `SKILL.md` or `REFERENCE.md`, update the relevant `expected_behavior` rows and, if discovery shifts, refresh trigger queries. Full trigger optimization loops belong in `skill-creator` (or equivalent), not in this file.
 
 ## Workflow
 
@@ -29,15 +35,15 @@ Checklist pattern per [Agent Skills: workflows](https://platform.claude.com/docs
 
 ### Task progress
 
-- [ ] Step 1: Prompt-generator finished; handoff matches `TARGET_OUTPUT.md` (XML in one `xml`-labeled markdown fence, then `## Outcome digest`).
-- [ ] Step 2: Execution `AskUserQuestion` sent (subagent config summary, three options, each preview as specified).
-- [ ] Step 3: Spawned only on **Launch it**; after **Edit first**, repeat Step 2 with updated XML; on **Cancel**, stop.
+- [ ] Step 1: Read `../prompt-generator/SKILL.md` (sibling skill) and run it through final handoff per `TARGET_OUTPUT.md` (one `xml` fence, then `## Outcome digest`).
+- [ ] Step 2: Execution `AskUserQuestion` sent (subagent config from host schema via `REFERENCE.md`, three options, previews as specified).
+- [ ] Step 3: Spawn only on **Launch it**; after **Edit first**, repeat Step 2 with updated XML; on **Cancel**, stop.
 
 ### Step 1 — Run prompt-generator (no shortcuts)
 
-1. Open and follow `prompt-generator` end-to-end: discovery, `AskUserQuestion`, drafting subagent, Outcome preview gate, final handoff.
-2. Stop after the **final** user-visible handoff: the full prompt XML inside **one** markdown code fence whose language tag is `xml`, then **`## Outcome digest`** immediately below, per `TARGET_OUTPUT.md`.
-3. Keep all draft, refinement, file validation, and preview rounds **inside** `prompt-generator` only.
+1. **Read** `../prompt-generator/SKILL.md` and execute it end-to-end: discovery, `AskUserQuestion`, drafting subagent, Outcome preview gate, final handoff. **Read** `../prompt-generator/REFERENCE.md` only when that workflow or the drafting agent requires rubric or template detail.
+2. Stop after the **final** user-visible handoff: full prompt XML in **one** markdown code fence with language tag `xml`, then **`## Outcome digest`** immediately below, per prompt-generator’s output contract.
+3. Keep draft, refinement, file validation, and preview rounds **inside** prompt-generator only—do not add a parallel refinement pipeline in this skill.
 
 The XML inside that fence is the **execution payload** for a blank context.
 
@@ -45,8 +51,9 @@ The XML inside that fence is the **execution payload** for a blank context.
 
 Use **one** `AskUserQuestion` after the prompt-generator handoff. Include in the question text:
 
-- Proposed **subagent** configuration from the table below (`subagent_type`, `mode`, **kebab-case** `name`, 3–5 words) for follow-up (`SendMessage({to: name})` where supported).
-- That **`prompt` will be the finalized XML** (verbatim), unless the user chose **Edit first** and supplied changes.
+- Proposed **subagent** configuration: map task to **host** `subagent_type` and `mode` using **`REFERENCE.md` § Subagent type** (confirm enums against the live tool descriptor).
+- **Kebab-case** `name` (3–5 words) for follow-up where the host supports it (e.g. `SendMessage({to: name})`).
+- That **`prompt` will be the finalized XML** (verbatim as approved), except after **Edit first** when the user replaces it.
 
 **Options** (each option’s `preview` shows the full XML the subagent would receive, or a short note for Cancel):
 
@@ -56,24 +63,18 @@ Use **one** `AskUserQuestion` after the prompt-generator handoff. Include in the
 
 ### Step 3 — Spawn (or stop)
 
-- **Launch it:** Call the Agent/Task tool with `run_in_background: true`, the chosen `name`, `subagent_type` and `mode` from the mapping below, and **`prompt` set to the approved XML text** (byte-for-byte the artifact, no summarization).
+- **Launch it:** Call the Agent/Task tool with `run_in_background: true`, the chosen `name`, host-valid `subagent_type` and `mode`, and **`prompt` set to the approved XML** — full content as shown in the **Launch it** preview, **no summarization or paraphrase**.
 - **Edit first:** Show the current XML in the chat if needed; after the user supplies changes, treat the result as the new artifact and repeat Step 2.
 - **Cancel:** Acknowledge and stop.
 
-### Subagent configuration (Step 2)
+### If the user only needed the artifact
 
-| Task type | subagent_type | mode |
-|-----------|---------------|------|
-| Codebase exploration, search, research | explore | default |
-| Code implementation, bug fix, refactoring | general-purpose | auto |
-| Read-only audit, analysis, review | general-purpose | default |
-| Architecture, multi-step planning | plan | plan |
+When the user clearly wants **only** `/prompt-generator` output (no subagent), **stop** using this skill and follow `../prompt-generator/SKILL.md` without an execution gate.
 
-Always set `run_in_background: true`.
+## When to stay inline
 
-## Constraints
+For **trivial** work (single quick read, one `grep`, one-line JSON check), **complete inline** and state that spawning a subagent would add overhead without benefit. Do not run prompt-generator solely to wrap a trivial lookup unless the user insists.
 
-- **Launch only after Step 2** resolves to **Launch it** with the XML preview the user approved.
-- **Ship the full approved XML** as the subagent `prompt` unless the user replaced it under **Edit first**.
-- For **trivial** work (single quick read, one grep), complete it **inline** and explain that delegation would add overhead.
-- When authoring via `prompt-generator`, you may **add** obstacle-handling lines inside the XML (for example avoid `--no-verify` or deleting unfamiliar files) **only** when the goal implies risky implementation.
+## Optional authoring note
+
+When the goal implies risky implementation, the **XML** authored inside prompt-generator may include obstacle-handling lines (for example avoiding `--no-verify` or deleting unfamiliar files). That lives in the handoff artifact, not in extra steps here.
