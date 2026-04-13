@@ -80,6 +80,21 @@ Tool name mapping for shared hook tooling (same source):
 | `WebFetch` | — | No |
 | `WebSearch` | — | No |
 
+## Releases (maintainers)
+
+This repo uses [Release Please](https://github.com/googleapis/release-please) ([action](https://github.com/googleapis/release-please-action)) on **`main`**:
+
+1. Land commits in [Conventional Commits](https://www.conventionalcommits.org/) form (`feat:`, `fix:`, `feat!:` for breaking, etc.).
+2. Release Please opens or updates a **release PR** (changelog + version bump in `package.json`).
+3. **Merge that PR** when you want to ship. The workflow then creates a **GitHub Release** and runs **`npm publish`** for `@jl-cmd/prompt-generator`.
+
+**Publish auth (pick one):**
+
+- **Trusted Publishing (recommended):** On the package → **Settings → Trusted Publisher**, set **GitHub Actions**, org **`jl-cmd`**, repo **`prompt-generator`**, workflow filename **`release-please.yml`** (filename only, must match `.github/workflows/release-please.yml`). The workflow uses **`id-token: write`** and **Node 24** so the npm CLI can publish via [OIDC](https://docs.npmjs.com/trusted-publishers) without **`NPM_TOKEN`**.
+- **Token fallback:** add an **`NPM_TOKEN`** secret and restore `NODE_AUTH_TOKEN` on the `npm publish` step if you are not using Trusted Publishing yet.
+
+**Optional:** use a **PAT** instead of `GITHUB_TOKEN` for the Release Please step if release PRs must trigger other workflows ([GitHub limitation](https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow) on `GITHUB_TOKEN`-created events).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

@@ -1,0 +1,43 @@
+# Release Please: conventional commits on main -> Release PR -> merge -> GitHub Release + npm publish.
+# Docs: https://github.com/googleapis/release-please-action
+# Publish: npm Trusted Publishing (OIDC). Register workflow filename `release-please.yml` on the package
+# (jl-cmd / prompt-generator). See https://docs.npmjs.com/trusted-publishers
+# id-token: write is required for OIDC. Node/npm versions must meet npm CLI 11.5.1+ / Node 22.14+ for OIDC publish.
+# Optional: repo secret NPM_TOKEN only if falling back to token-based publish (not used when OIDC succeeds).
+
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: node
+
+  publish-npm:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+      - run: npm publish
