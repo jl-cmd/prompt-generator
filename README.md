@@ -35,7 +35,7 @@ Runs the **same** prompt-generator flow through that final handoff (discovery �
 
 After the handoff, it sends **one** execution `AskUserQuestion` (**Launch it**, **Edit first**, **Cancel**). On **Launch it**, it spawns a background Agent/Task with `run_in_background: true` and `prompt` set to the **approved XML** from the preview (full content, no summarization—the execution payload for a new context).
 
-Typical **logical** role → **Cursor Task** `subagent_type` mapping (always confirm against your live tool schema—see `skills/agent-prompt/REFERENCE.md`):
+Typical **logical** role → **Cursor Task** `subagent_type` mapping (always confirm against your live tool schema—see `skills/agent-prompt/REFERENCE.md`; runtime reads use `../prompt-generator/` from the installed sibling skill directory):
 
 | Task type | subagent_type | mode |
 | --- | --- | --- |
