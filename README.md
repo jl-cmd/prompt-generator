@@ -84,6 +84,8 @@ Tool name mapping for shared hook tooling (same source):
 
 This repo uses [Release Please](https://github.com/googleapis/release-please) ([action](https://github.com/googleapis/release-please-action)) on **`main`**:
 
+Maintainers should **squash merge** into `main` and use a **conventional PR title**, because that title becomes the default squash-merge commit subject Release Please reads. **Merge commits** are fine only when the **merge commit message** itself is conventional (for example not the default `Merge pull request #…` title, which Release Please does not treat as a conventional changelog entry).
+
 1. Land commits in [Conventional Commits](https://www.conventionalcommits.org/) form (`feat:`, `fix:`, `feat!:` for breaking, etc.).
 2. Release Please opens or updates a **release PR** (changelog + version bump in `package.json`).
 3. **Merge that PR** when you want to ship. The workflow then creates a **GitHub Release** and runs **`npm publish`** for `@jl-cmd/prompt-generator`.

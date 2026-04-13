@@ -1,0 +1,42 @@
+# Validates the PR title against Conventional Commits so squash-merge into main yields messages
+# Release Please (node) can parse. Uses pull_request (not pull_request_target): same-repo branches only;
+# forks lack a usable GITHUB_TOKEN for this pattern per action docs.
+#
+# Required status (Rulesets or branch protection): add the check that appears in the Actions tab,
+# typically: Conventional pull request title / Validate conventional pull request title
+# If gh api returns 403 or rules are org-enforced, add that name manually in the repository settings.
+# Register the required status check only after this workflow has landed on main (so the check exists).
+
+name: Conventional pull request title
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+
+permissions:
+  contents: read
+
+jobs:
+  validate-pr-title:
+    name: Validate conventional pull request title
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: amannn/action-semantic-pull-request@v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            chore
+            ci
+            perf
+            refactor
+            revert
