@@ -1,12 +1,11 @@
 ---
 name: agent-prompt
 description: >-
-  Run the full prompt-generator workflow, then—after explicit user approval—spawn a
-  background subagent whose task prompt is that finalized XML artifact. Use instead of
-  /prompt-generator when the user wants the same prompt quality plus delegated execution.
-  Triggers on /agent-prompt, "launch an agent for this", "spawn agent to do X",
-  "delegate this", "run this in background", or any task that benefits from agent
-  execution after a paste-ready prompt exists.
+  Runs the full prompt-generator workflow, then spawns a background subagent using
+  the user-approved XML prompt as its task. Use for /agent-prompt, delegated or
+  background execution after a paste-ready prompt; use /prompt-generator when only
+  the artifact is needed. Triggers include "launch an agent", "spawn agent to do X",
+  "delegate this", and "run this in background".
 ---
 
 @packages/claude-dev-env/skills/prompt-generator/SKILL.md
@@ -14,29 +13,31 @@ description: >-
 
 # Agent prompt
 
-**Relationship to prompt-generator:** Do everything prompt-generator does, in the same order and to the same delivery contract (`TARGET_OUTPUT.md`). The only addition is a final execution gate and a background subagent that runs using the approved prompt artifact as its instructions.
+## Summary
 
-**When this skill applies:** The user wants work executed by a subagent, not only a paste-ready prompt. If they only want the artifact, use `/prompt-generator`.
-
-**Invocation with arguments** (e.g. `/agent-prompt fix the auth bug via TDD`): Treat the arguments as the user goal passed into prompt-generator (same as starting `/prompt-generator` with that text), then continue to execution steps below.
+- **Prompt authoring:** Identical to `prompt-generator` (order, validation, `TARGET_OUTPUT.md` handoff). This skill does not add a second refinement pipeline.
+- **Extra step:** After the handoff, one execution approval, then a background Agent/Task whose `prompt` is the finalized XML (verbatim).
+- **Use this skill when:** The user wants a subagent to execute the work, not only receive the prompt file.
+- **Use `/prompt-generator` instead when:** The user only needs the fenced XML and outcome digest.
+- **Slash args** (e.g. `/agent-prompt fix the auth bug via TDD`): Treat as the goal string for `prompt-generator`, then run the workflow steps below.
 
 ## Workflow
 
-Copy this checklist and check off items as you complete them (see [Agent Skills best practices — workflows](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#use-workflows-for-complex-tasks)):
+Checklist pattern per [Agent Skills: workflows](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#use-workflows-for-complex-tasks). Copy into the thread and mark items complete as you go.
 
-**Task progress**
+### Task progress
 
-- [ ] Step 1: Prompt-generator complete (`xml` fence + `## Outcome digest` per `TARGET_OUTPUT.md`)
-- [ ] Step 2: Execution `AskUserQuestion` shown (config summary + three options with previews)
-- [ ] Step 3: Spawn only on **Launch it**; loop Step 2 after **Edit first**; stop on **Cancel**
+- [ ] Step 1: Prompt-generator finished; handoff matches `TARGET_OUTPUT.md` (XML in one `xml`-labeled markdown fence, then `## Outcome digest`).
+- [ ] Step 2: Execution `AskUserQuestion` sent (subagent config summary, three options, each preview as specified).
+- [ ] Step 3: Spawned only on **Launch it**; after **Edit first**, repeat Step 2 with updated XML; on **Cancel**, stop.
 
 ### Step 1 — Run prompt-generator (no shortcuts)
 
 1. Open and follow `prompt-generator` end-to-end: discovery, `AskUserQuestion`, drafting subagent, Outcome preview gate, final handoff.
-2. Stop after you have the **final** user-visible deliverable from prompt-generator: **one** complete ` ```xml ` fence (the prompt artifact) plus **`## Outcome digest`** immediately after it, per `TARGET_OUTPUT.md`.
+2. Stop after the **final** user-visible handoff from prompt-generator: the full prompt XML inside **one** markdown code fence whose language tag is `xml`, then **`## Outcome digest`** immediately below, per `TARGET_OUTPUT.md`.
 3. Do **not** run a second refinement pipeline, duplicate compliance audit, or re-author sections here—prompt-generator already owns draft, refinement, validation loop, and preview rounds.
 
-The string inside the `xml` fence is the **execution payload**: self-contained instructions for a new context with no access to this chat.
+The XML inside that fence is the **execution payload**: self-contained instructions for a new context with no access to this chat.
 
 ### Step 2 — Approve execution
 
