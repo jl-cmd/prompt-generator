@@ -1,0 +1,44 @@
+{
+  "skill_name": "agent-prompt",
+  "source": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#evaluation-and-iteration",
+  "depends_on": "skills/prompt-generator/SKILL.md",
+  "evals": [
+    {
+      "id": 1,
+      "name": "pg_then_execution_gate",
+      "scenario": "Happy path",
+      "prompt": "/agent-prompt Add a failing test for packages/claude-dev-env/hooks/blocking/prompt_workflow_validate.py exit code 2 messages, then minimal code to pass. Use TDD.",
+      "files": [],
+      "expected_behavior": [
+        "Orchestrator runs prompt-generator end-to-end before any execution spawn: discovery and AskUserQuestion behave per prompt-generator; Outcome preview gate appears; final user-visible handoff includes one xml-tagged fence with the full prompt artifact plus ## Outcome digest per TARGET_OUTPUT.md",
+        "After that handoff, exactly one AskUserQuestion presents execution approval with subagent type, mode, kebab-case name, and that the subagent prompt will be the finalized XML",
+        "AskUserQuestion options include Launch it (recommended), Edit first, and Cancel; Launch it and Edit first previews follow SKILL.md",
+        "On Launch it, Agent or Task tool runs with run_in_background true and prompt parameter equal to the approved XML from the fence (no summary substitution)",
+        "No second prompt refinement pipeline (six-section refiner, separate compliance audit pass) runs outside prompt-generator’s own internal flow"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "no_spawn_without_approval",
+      "scenario": "Safety",
+      "prompt": "/agent-prompt Run a quick docs pass on skills/prompt-generator/TARGET_OUTPUT.md and open a draft PR.",
+      "files": ["skills/prompt-generator/TARGET_OUTPUT.md"],
+      "expected_behavior": [
+        "No background Agent or Task spawn for execution occurs before the post-handoff AskUserQuestion resolves with Launch it",
+        "If the user chose Cancel, no execution spawn; if Edit first, orchestrator returns to execution AskUserQuestion after edits without launching on stale XML"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "edit_first_then_launch",
+      "scenario": "Approval loop",
+      "prompt": "/agent-prompt Draft a minimal XML handoff for continuing work on skills/agent-prompt/SKILL.md. [After the assistant shows the xml fence and ## Outcome digest, the user says:] Edit first — remove the optional guardrail bullet from the XML. [Then:] Launch it.",
+      "files": ["skills/agent-prompt/SKILL.md"],
+      "expected_behavior": [
+        "No execution spawn before the post-handoff AskUserQuestion",
+        "After Edit first, the assistant shows revised XML (or confirms the edit) and returns to Step 2 AskUserQuestion before spawning",
+        "On Launch it, the spawned subagent prompt matches the post-edit XML from the fence, not the pre-edit version"
+      ]
+    }
+  ]
+}
