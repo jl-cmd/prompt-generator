@@ -1,6 +1,6 @@
 {
     "name": "@jl-cmd/prompt-generator",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "description": "Standalone prompt-generator and agent-prompt skills for Claude Code",
     "type": "module",
     "bin": {
