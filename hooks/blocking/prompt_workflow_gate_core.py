@@ -211,7 +211,14 @@ def extract_plan_section_headers(
 def build_expected_tag_list(
     headers: list[tuple[int, str]],
 ) -> list[str]:
-    return [tag_name for _depth, tag_name in headers]
+    all_expected_tag_names: list[str] = []
+    all_seen_tag_names: set[str] = set()
+    for _each_depth, each_tag_name in headers:
+        if each_tag_name in all_seen_tag_names:
+            continue
+        all_seen_tag_names.add(each_tag_name)
+        all_expected_tag_names.append(each_tag_name)
+    return all_expected_tag_names
 
 
 def missing_plan_derived_xml_sections(
