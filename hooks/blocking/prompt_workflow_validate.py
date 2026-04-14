@@ -240,8 +240,8 @@ def main() -> None:
     elif not sys.stdin.isatty():
         assistant_text = sys.stdin.read()
     else:
-        sys.stderr.write("Usage: prompt_workflow_validate.py [path/to/draft.md] [path/to/plan.md]\n")
-        sys.stderr.write("       cat draft.md | prompt_workflow_validate.py\n")
+        sys.stderr.write("Usage: python prompt_workflow_validate.py [path/to/draft.md] [path/to/plan.md]\n")
+        sys.stderr.write("       cat draft.md | python prompt_workflow_validate.py\n")
         sys.exit(blocked_exit_code)
 
     plan_text = ""
