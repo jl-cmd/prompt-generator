@@ -5,7 +5,7 @@
 Validate deterministic behavior for:
 
 1. Base prompt generation (`/prompt-generator`)
-2. Six section refiners (owned by `/prompt-generator`)
+2. Plan-derived section refiners (owned by `/prompt-generator`)
 3. Merge + final audit with citation-grounded checks
 4. Targeted fix + capped re-audit loop
 
@@ -26,20 +26,14 @@ Use this command:
      - `target_file_globs`
      - `comparison_basis`
      - `completion_boundary`
-   - XML scaffold includes all sections — verified by the Stop hook at runtime; each required section tag must have both an opening and a closing tag:
-     - `<role>`
-     - `<background>`
-     - `<instructions>`
-     - `<constraints>`
-     - `<output_format>`
-     - `<illustrations>`
+   - XML scaffold includes all sections derived from the approved plan's heading structure — verified by the Stop hook at runtime; each plan-derived section tag must have both an opening and a closing tag.
    - Includes internal refinement object with:
      - `pipeline_mode: internal_section_refinement_with_final_audit`
-     - `required_sections` list with all six sections
+     - `required_sections` list populated from the approved plan's headings
      - section/merge/audit output contracts
 
 2. **Section refinement stage**
-   - Exactly 6 agent runs, one per section.
+   - One agent run per plan-derived section (count is dynamic, determined by the approved plan).
    - Each section output includes:
      - `improved_block`
      - `rationale`
@@ -47,7 +41,7 @@ Use this command:
    - No section agent edits another section.
 
 3. **Merge stage**
-   - One canonical merged prompt with all six sections.
+   - One canonical merged prompt with all plan-derived sections.
 
 4. **Audit stage**
    - Output includes:
@@ -129,7 +123,7 @@ If `overall_status` is `fail`:
 Validate fail-closed runtime gates:
 
 1. **Stop leakage/scope/checklist gate**
-   - **Section-presence gate (Stop)** — Block responses where the fenced XML artifact is missing any of the five required section tag pairs: `role`, `background`, `instructions`, `constraints`, `output_format`.
+   - **Section-presence gate (Stop)** — Block responses where the fenced XML artifact is missing any plan-derived section tag pairs extracted from the approved plan's heading structure.
    - Block responses that leak raw internal refinement object fields unless debug intent is explicit.
    - Block responses missing deterministic checklist rows when audit output is present.
    - Block responses using ambiguous scope phrasing in scope-bound sections.
@@ -149,7 +143,7 @@ Validate fail-closed runtime gates:
   - Missing required scope anchors (when Stop guard applies)
   - Raw internal object leakage without debug intent
   - Missing required checklist rows in audit output
-  - Missing required XML sections (`role`, `background`, `instructions`, `constraints`, `output_format`) in the fenced artifact (opening and closing tags)
+  - Missing plan-derived XML sections in the fenced artifact (opening and closing tags)
   - Ambiguous scope terms in scope-bound text
   - Negative keywords inside fenced XML artifacts
   - Hedging language inside fenced XML artifacts

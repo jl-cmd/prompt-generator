@@ -64,7 +64,7 @@ Jump from concept to the platform specs the post names:
 - [Context windows](https://platform.claude.com/docs/en/build-with-claude/context-windows) / [Context editing](https://platform.claude.com/docs/en/build-with-claude/context-editing) / [Compaction](https://platform.claude.com/docs/en/build-with-claude/compaction)
 - [Subagents](https://code.claude.com/docs/en/sub-agents)
 - [System prompts](https://platform.claude.com/docs/en/release-notes/system-prompts) / [Working with the Messages API](https://platform.claude.com/docs/en/build-with-claude/working-with-messages) / [Prompt caching](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)
-- [Model migration guide — hard-coded filters](https://platform.claude.com/docs/en/about-claude/models/migration-guide#additional-recommended-changes)
+- [Model migration guide -- hard-coded filters](https://platform.claude.com/docs/en/about-claude/models/migration-guide#additional-recommended-changes)
 - [Harness design for long-running applications](https://www.anthropic.com/engineering/harness-design-long-running-apps)
 - [Claude Code auto-mode](https://www.anthropic.com/engineering/claude-code-auto-mode)
 - [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
@@ -88,7 +88,7 @@ Promote actions to **dedicated tools** with typed arguments when the harness mus
 
 Re-evaluate promotions as models improve—e.g., Claude Code **auto-mode** (secondary reviewer over bash strings) can **reduce** bespoke tools **only** where users accept that trust profile; **high-stakes** actions still warrant dedicated tools ([Claude Code auto-mode](https://www.anthropic.com/engineering/claude-code-auto-mode)).
 
-### Benchmark vignettes — motivation only, not guarantees (Hook 9)
+### Benchmark vignettes -- motivation only, not guarantees (Hook 9)
 
 | Vignette | Outcome stated in the post |
 |----------|----------------------------|
@@ -221,8 +221,8 @@ Shape (field names stable for internal audit helpers and Stop-hook leak detectio
     "comparison_basis": "...",
     "completion_boundary": "..."
   },
-  "required_sections": ["role", "background", "instructions", "constraints", "output_format", "illustrations"],
-  "base_prompt_xml": "<role>...</role><background>...</background><instructions>...</instructions><constraints>...</constraints><illustrations>...</illustrations><output_format>...</output_format>",
+  "required_sections": ["<derived from approved plan headers, e.g. context, goal, verified_facts, delivery, primary_path>"],
+  "base_prompt_xml": "<context>...</context><goal>...</goal><verified_facts>...</verified_facts><delivery>...</delivery><primary_path>...</primary_path>",
   "section_scope_rule": "Each refiner edits exactly one section and returns sibling sections unchanged.",
   "section_output_contract": {
     "required_fields": ["improved_block", "rationale", "concise_diff"]

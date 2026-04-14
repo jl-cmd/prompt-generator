@@ -1,14 +1,17 @@
 """Unit tests for shared prompt workflow gate logic."""
 
 from prompt_workflow_gate_core import (
+    build_expected_tag_list,
     extract_fenced_xml_content,
     extract_fenced_xml_content_from_export,
+    extract_plan_section_headers,
     find_ambiguous_scope_terms,
     has_checklist_container,
     has_internal_object_leak,
     is_prompt_workflow_response,
     missing_context_control_signals,
     missing_checklist_rows,
+    missing_plan_derived_xml_sections,
     missing_required_xml_sections,
     missing_scope_anchors,
     normalize_prompt_workflow_export,
@@ -81,28 +84,25 @@ def test_missing_required_xml_sections_all_present_returns_empty() -> None:
     )
     assert missing_required_xml_sections(_fenced_xml(body)) == []
 
-def test_missing_required_xml_sections_missing_background() -> None:
+def test_missing_required_xml_sections_empty_when_no_fixed_sections() -> None:
+    body = "<context>C.</context>\n<delivery>D.</delivery>\n"
+    assert missing_required_xml_sections(_fenced_xml(body)) == []
+
+def test_missing_required_xml_sections_no_fence_returns_empty() -> None:
+    assert missing_required_xml_sections("no fenced xml here") == []
+
+def test_plan_derived_sections_missing_background() -> None:
+    plan_sections = ["role", "background", "instructions", "constraints", "output_format"]
     body = (
         "<role>R.</role>\n"
         "<instructions>I.</instructions>\n"
         "<constraints>Co.</constraints>\n"
         "<output_format>O.</output_format>\n"
     )
-    assert missing_required_xml_sections(_fenced_xml(body)) == ["background"]
+    assert missing_plan_derived_xml_sections(_fenced_xml(body), plan_sections) == ["background"]
 
-def test_missing_required_xml_sections_missing_role_and_output_format() -> None:
-    body = (
-        "<background>C.</background>\n"
-        "<instructions>I.</instructions>\n"
-        "<constraints>Co.</constraints>\n"
-    )
-    missing = missing_required_xml_sections(_fenced_xml(body))
-    assert missing == ["role", "output_format"]
-
-def test_missing_required_xml_sections_no_fence_returns_empty() -> None:
-    assert missing_required_xml_sections("no fenced xml here") == []
-
-def test_missing_required_xml_sections_prose_without_tags_counts_as_missing() -> None:
+def test_plan_derived_sections_prose_without_tags_counts_as_missing() -> None:
+    plan_sections = ["role", "background", "instructions", "constraints", "output_format"]
     body = (
         "<role>R.</role>\n"
         "background appears in prose but has no tags.\n"
@@ -110,7 +110,70 @@ def test_missing_required_xml_sections_prose_without_tags_counts_as_missing() ->
         "<constraints>Co.</constraints>\n"
         "<output_format>O.</output_format>\n"
     )
-    assert missing_required_xml_sections(_fenced_xml(body)) == ["background"]
+    assert missing_plan_derived_xml_sections(_fenced_xml(body), plan_sections) == ["background"]
+
+def test_extract_plan_section_headers_single_depth() -> None:
+    plan = "# Context\nSome content\n## Goal\nGoal content\n"
+    headers = extract_plan_section_headers(plan)
+    assert headers == [(1, "context"), (2, "goal")]
+
+
+def test_extract_plan_section_headers_multi_depth() -> None:
+    plan = (
+        "# Context\n"
+        "## Goal\n"
+        "### Sub detail\n"
+        "# Delivery\n"
+        "## Primary path\n"
+    )
+    headers = extract_plan_section_headers(plan)
+    assert headers == [
+        (1, "context"),
+        (2, "goal"),
+        (3, "sub_detail"),
+        (1, "delivery"),
+        (2, "primary_path"),
+    ]
+
+
+def test_extract_plan_section_headers_normalizes_special_characters() -> None:
+    plan = "# Target repos (32)\n## File content (draft, <4000 chars)\n"
+    headers = extract_plan_section_headers(plan)
+    assert headers == [
+        (1, "target_repos_32"),
+        (2, "file_content_draft_4000_chars"),
+    ]
+
+
+def test_extract_plan_section_headers_ignores_non_header_lines() -> None:
+    plan = "Regular text\n# Only header\nMore text\n"
+    headers = extract_plan_section_headers(plan)
+    assert headers == [(1, "only_header")]
+
+
+def test_build_expected_tag_list_returns_all_tag_names() -> None:
+    headers = [(1, "context"), (2, "goal"), (2, "verified_facts"), (1, "delivery")]
+    tag_list = build_expected_tag_list(headers)
+    assert tag_list == ["context", "goal", "verified_facts", "delivery"]
+
+
+def test_missing_plan_derived_xml_sections_all_present() -> None:
+    fenced_xml = _fenced_xml(
+        "<context><goal>G</goal></context>\n<delivery>D</delivery>"
+    )
+    missing = missing_plan_derived_xml_sections(
+        fenced_xml, ["context", "goal", "delivery"]
+    )
+    assert missing == []
+
+
+def test_missing_plan_derived_xml_sections_detects_missing() -> None:
+    fenced_xml = _fenced_xml("<context>C</context>")
+    missing = missing_plan_derived_xml_sections(
+        fenced_xml, ["context", "goal", "delivery"]
+    )
+    assert missing == ["goal", "delivery"]
+
 
 def test_extract_fenced_xml_preserves_content_after_nested_inner_fence() -> None:
     message = (

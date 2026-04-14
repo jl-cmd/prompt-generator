@@ -10,14 +10,14 @@
       "prompt": "/prompt-generator Write a system prompt for a Python linting agent that auto-fixes code style issues in this repo",
       "files": [],
       "expected_behavior": [
-        "Discovery tool calls (Glob/Grep) execute before any AskUserQuestion",
+        "EnterPlanMode is invoked before any AskUserQuestion",
         "All questions delivered via AskUserQuestion — zero questions in direct chat text",
         "AskUserQuestion contains 2-4 questions, each with 2-4 options, recommended option first",
         "After internal drafting finishes, one assistant turn shows ### Outcome preview with bullets only: what executing the generated prompt will produce, primary inputs or tools, done-when, short sample (TARGET_OUTPUT.md)",
         "That same turn uses AskUserQuestion (2-4 options): recommended option first = user confirms the preview matches their intent and proceeds to the final handoff; two options offer scope or emphasis shifts grounded in discovery; one option collects free-text refinements and triggers another drafting pass (at most three such preview rounds unless the user raises the cap in chat)",
         "Final response: Audit line, one Markdown code fence tagged xml with the full prompt, then ## Outcome digest after the closing fence",
         "No second outer ```xml fence in the digest (samples use four spaces or tilde fences only)",
-        "Fenced block contains <role>, <background>, <instructions>, <constraints>, <output_format>",
+        "Fenced block contains XML sections derived from the approved plan's heading structure",
         "Prompt generation delegated to a subagent (Agent tool call visible in the flow)"
       ]
     },
@@ -33,7 +33,7 @@
       "expected_behavior": [
         "AskUserQuestion has 1-2 questions — lighter than Scenario 1",
         "Generated prompt <background> includes: session state, decisions, files modified, next steps",
-        "No redundant discovery tool calls for information already in conversation",
+        "No redundant plan-mode exploration for information already in conversation",
         "Handoff prompt is self-contained — a new session can resume without prior context",
         "Prior decisions preserved in the handoff, not lost or paraphrased away",
         "After internal drafting finishes, ### Outcome preview bullets plus AskUserQuestion as in eval id 1 (confirm match as recommended first option; two contextual alternates; free-text refine option; preview loop cap)",
@@ -49,7 +49,7 @@
       "expected_behavior": [
         "First AskUserQuestion question confirms extracted intent — not generic",
         "Ambiguities surfaced as specific options, not open-ended questions",
-        "Discovery tool calls verify references from input (shared_utils, config patterns)",
+        "Plan mode exploration verifies references from input (shared_utils, config patterns)",
         "ALL requirements from unstructured input captured (timeouts, selectors, config extraction, TDD, code rules, test safety) — none dropped",
         "After internal drafting finishes, ### Outcome preview bullets plus AskUserQuestion as in eval id 1 (confirm match as recommended first option; two contextual alternates; free-text refine option; preview loop cap)",
         "Final output: 1-liner audit + fenced XML prompt + ## Outcome digest after the fence"
@@ -67,7 +67,8 @@
         "Prompt content about code review and security — zero contamination from prior noise",
         "No references to prior errors, tangents, or unrelated tool calls in the prompt",
         "XML structure complete and well-formed — no truncation from context pressure",
-        "Subagent delegation visible (Agent tool call with curated context, not raw conversation)"
+        "Subagent delegation visible (Agent tool call with curated context, not raw conversation)",
+        "Plan mode entry scoped to the current task — prior noisy context excluded from plan"
       ]
     },
     {
@@ -78,7 +79,7 @@
       "files": ["packages/samsung-automation/shared_utils/export_handler.py"],
       "expected_behavior": [
         "No tool_use blocks appear after the first fence marker of the canonical prompt artifact",
-        "All Glob/Grep discovery calls precede the AskUserQuestion",
+        "All plan-mode exploration and AskUserQuestion interactions precede the subagent invocation",
         "AskUserQuestion interactions precede the subagent; Outcome preview AskUserQuestion precedes the final Audit line and xml fence",
         "Review the last successful Audit + fenced xml pair; blocked retry attempts preserved by exported conversation logs do not count as additional delivered artifacts"
       ]
@@ -104,11 +105,11 @@
       "prompt": "/prompt-generator Create a prompt for an agent that refactors the Samsung theme scoring pipeline — but I'm not sure if the scoring logic is in theme_scorer.py or distributed across multiple files",
       "files": [],
       "expected_behavior": [
-        "Discovery tool calls attempt to locate scoring logic before prompt generation",
-        "If resolved: prompt references concrete file paths from discovery",
-        "If unresolved: prompt contains <open_question> in <background> for downstream agent",
-        "No re-entry to discovery after the canonical artifact fence starts",
-        "AskUserQuestion may surface the uncertainty if discovery was inconclusive; when discovery resolves concrete paths before the artifact, absence of <open_question> is expected"
+        "Plan mode exploration attempts to locate scoring logic before prompt generation",
+        "If resolved: prompt references concrete file paths from plan-mode exploration",
+        "If unresolved: prompt contains <open_question> in the relevant plan-derived section for downstream agent",
+        "No re-entry to plan mode after the canonical artifact fence starts",
+        "AskUserQuestion may surface the uncertainty if plan-mode exploration was inconclusive; when exploration resolves concrete paths before the artifact, absence of <open_question> is expected"
       ]
     },
     {
@@ -136,7 +137,7 @@
         "Every instruction phrased as a positive directive: what TO do, what TO produce, what TO enforce",
         "Constraints section uses affirmative boundaries: 'only X', 'always X', 'ensure X', 'require X' — positive framing throughout",
         "Example: 'Ensure all functions have explicit return types' passes; 'Do not leave return types implicit' fails; 'Avoid missing return types' fails",
-        "Applies to all sections inside the fenced block: <role>, <background>, <instructions>, <constraints>, <output_format>"
+        "Applies to all plan-derived sections inside the fenced block"
       ]
     },
     {
@@ -146,21 +147,22 @@
       "prompt": "/prompt-generator Write a system prompt for a Python linting agent that auto-fixes code style issues in this repo",
       "files": [],
       "expected_behavior": [
-        "Fenced XML block contains opening and closing tags for all five required sections: role, background, instructions, constraints, output_format",
-        "Each required section contains substantive content (minimum one sentence each)",
-        "The Stop hook section-presence check passes for this output (no missing section tags)",
-        "Sections appear in order: role first, output_format last among the five required sections"
+        "The approved plan produces at least one heading that maps to each major concern of the task (role/identity, background/context, instructions/steps, constraints/boundaries, output format)",
+        "The fenced XML block contains opening and closing tags for every section derived from the approved plan's heading structure",
+        "Each plan-derived section contains substantive content (minimum one sentence each)",
+        "The Stop hook section-presence check passes for this output (no missing section tags relative to the approved plan)",
+        "Sections derived from the plan appear in a logical order matching the plan's heading sequence"
       ]
     },
     {
       "id": 11,
       "name": "section_missing_triggers_hook_block",
       "scenario": "Section completeness gate — failure path",
-      "prompt": "Synthetic eval: assistant final message is prompt-workflow shaped (overall_status, checklist, scope anchors, runtime signals) with a fenced Markdown XML block whose body omits the entire background section (no background opening/closing tags); observer asserts Stop hook behavior and successful retry.",
+      "prompt": "Synthetic eval: assistant final message is prompt-workflow shaped (overall_status, checklist, scope anchors, runtime signals) with a fenced Markdown XML block whose body omits a section that was present as a heading in the approved plan; observer asserts Stop hook behavior and successful retry.",
       "files": [],
       "expected_behavior": [
-        "The Stop hook runs _check_required_xml_sections and returns a block decision naming background as a missing section",
-        "The model retry includes all five required sections with both opening and closing tags",
+        "The Stop hook runs _check_required_xml_sections and returns a block decision naming the plan-derived section that is missing from the artifact",
+        "The model retry includes all plan-derived sections with both opening and closing tags",
         "The retry output passes the section-presence gate (empty missing list from missing_required_xml_sections)"
       ]
     },
@@ -184,7 +186,7 @@
       "files": [],
       "expected_behavior": [
         "prompt_workflow_gate_core.extract_fenced_xml_content includes text after inner ```bash ... ``` lines up to the final closing ``` of the xml fence",
-        "missing_required_xml_sections sees closing tags for role, background, instructions, constraints, output_format when those appear after nested fences",
+        "missing_required_xml_sections sees closing tags for all plan-derived sections when those appear after nested fences",
         "SKILL.md §7 states ordered authoring steps for <illustrations>: four-space-indented sample lines, then tilde fences, then a complete triple-backtick pair when required"
       ]
     },
