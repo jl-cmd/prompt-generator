@@ -94,13 +94,13 @@ NEGATIVE_INDIRECT_PATTERNS_IN_ARTIFACT: tuple[str, ...] = (
     r"as opposed to\s+\w+",
 )
 
-REQUIRED_XML_SECTIONS: tuple[str, ...] = (
-    "role",
-    "background",
-    "instructions",
-    "constraints",
-    "output_format",
-)
+REQUIRED_XML_SECTIONS: tuple[str, ...] = ()
+
+MINIMUM_TOP_LEVEL_TAG_COUNT: int = 2
+
+MAXIMUM_MARKDOWN_HEADER_DEPTH: int = 6
+
+FILE_READ_ENCODING: str = "utf-8"
 
 COMPILED_NEGATIVE_KEYWORD_PATTERNS: tuple[re.Pattern[str], ...] = tuple(
     re.compile(rf"\b{re.escape(keyword)}\b", re.IGNORECASE)

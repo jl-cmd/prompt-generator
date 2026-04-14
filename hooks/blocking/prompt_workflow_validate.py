@@ -3,12 +3,12 @@
 
 Public API
 ----------
-validate_prompt_workflow(assistant_message, user_context="")
+validate_prompt_workflow(assistant_message, user_context="", plan_content="")
     Returns a ``ValidationResult`` with allowed/blocked status and reasons.
 
 CLI
 ---
-    python prompt_workflow_validate.py path/to/draft.md
+    python prompt_workflow_validate.py path/to/draft.md [path/to/plan.md]
     cat draft.md | python prompt_workflow_validate.py
 
 Exit codes match hook conventions: 0 allowed, 2 blocked.
@@ -20,7 +20,10 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from prompt_workflow_gate_config import FILE_READ_ENCODING
 from prompt_workflow_gate_core import (
+    build_expected_tag_list,
+    extract_plan_section_headers,
     find_ambiguous_scope_terms,
     find_negative_keywords_in_fenced_xml,
     has_checklist_container,
@@ -29,6 +32,7 @@ from prompt_workflow_gate_core import (
     is_prompt_workflow_response,
     missing_checklist_rows,
     missing_context_control_signals,
+    missing_plan_derived_xml_sections,
     missing_required_xml_sections,
     missing_scope_anchors,
 )
@@ -71,6 +75,28 @@ def _check_internal_leak(
         message=(
             "Raw internal refinement object leakage detected. "
             "Return sanitized user-facing output unless explicit debug intent is present."
+        ),
+    )
+
+
+def _check_plan_derived_sections(
+    assistant_message: str,
+    plan_content: str,
+) -> ValidationResult | None:
+    headers = extract_plan_section_headers(plan_content)
+    expected_tags = build_expected_tag_list(headers)
+    if not expected_tags:
+        return None
+    missing_sections = missing_plan_derived_xml_sections(
+        assistant_message, expected_tags,
+    )
+    if not missing_sections:
+        return None
+    return _blocked(
+        code="missing_plan_sections",
+        message=(
+            "Fenced XML artifact missing plan-derived sections: "
+            + ", ".join(missing_sections)
         ),
     )
 
@@ -156,11 +182,16 @@ def _check_negative_keywords(assistant_message: str) -> ValidationResult | None:
 def validate_prompt_workflow(
     assistant_message: str,
     user_context: str = "",
+    plan_content: str = "",
 ) -> ValidationResult:
     """Run all prompt-workflow gates on *assistant_message*.
 
     Returns ``ValidationResult.allowed == True`` when every gate passes.
     The first failing gate short-circuits and its reason is returned.
+
+    When *plan_content* is provided (markdown text of the approved plan),
+    the validator extracts headers and checks that all plan-derived
+    sections appear as XML tags in the fenced artifact.
     """
     allowed_result = ValidationResult(allowed=True)
 
@@ -189,24 +220,38 @@ def validate_prompt_workflow(
         if gate_result is not None:
             return gate_result
 
+    if plan_content.strip():
+        plan_result = _check_plan_derived_sections(assistant_message, plan_content)
+        if plan_result is not None:
+            return plan_result
+
     return allowed_result
 
 
 def main() -> None:
     blocked_exit_code: int = 2
     allowed_exit_code: int = 0
+    minimum_args_for_draft: int = 1
+    minimum_args_for_plan: int = 2
 
-    if len(sys.argv) > 1:
-        file_path = Path(sys.argv[1])
-        assistant_text = file_path.read_text(encoding="utf-8")
+    if len(sys.argv) > minimum_args_for_draft:
+        file_path = Path(sys.argv[minimum_args_for_draft])
+        assistant_text = file_path.read_text(encoding=FILE_READ_ENCODING)
     elif not sys.stdin.isatty():
         assistant_text = sys.stdin.read()
     else:
-        sys.stderr.write("Usage: prompt_workflow_validate.py [path/to/draft.md]\n")
+        sys.stderr.write("Usage: prompt_workflow_validate.py [path/to/draft.md] [path/to/plan.md]\n")
         sys.stderr.write("       cat draft.md | prompt_workflow_validate.py\n")
         sys.exit(blocked_exit_code)
 
-    validation_result = validate_prompt_workflow(assistant_text)
+    plan_text = ""
+    if len(sys.argv) > minimum_args_for_plan:
+        plan_path = Path(sys.argv[minimum_args_for_plan])
+        plan_text = plan_path.read_text(encoding=FILE_READ_ENCODING)
+
+    validation_result = validate_prompt_workflow(
+        assistant_text, plan_content=plan_text,
+    )
     if validation_result.allowed:
         sys.exit(allowed_exit_code)
     for each_reason in validation_result.reasons:

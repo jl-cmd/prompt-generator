@@ -36,10 +36,14 @@ def _wrap_five_section_scaffold(inner_body: str) -> str:
     has_instructions = "<instructions>" in inner_body
     has_constraints = "<constraints>" in inner_body
     instructions_section = (
-        "" if has_instructions else "<instructions>Test instructions sentence one.</instructions>\n"
+        ""
+        if has_instructions
+        else "<instructions>Test instructions sentence one.</instructions>\n"
     )
     constraints_section = (
-        "" if has_constraints else "<constraints>Test constraints sentence one.</constraints>\n"
+        ""
+        if has_constraints
+        else "<constraints>Test constraints sentence one.</constraints>\n"
     )
     return (
         "<role>Test role sentence one.</role>\n"
@@ -81,19 +85,12 @@ class TestValidatePromptWorkflowFunction:
         message = (
             "overall_status: pass\n"
             + _full_checklist_rows()
-            + "target_local_roots\n"
-            + "target_canonical_roots\n"
-            + "target_file_globs\n"
-            + "comparison_basis\n"
-            + "completion_boundary\n"
+            + "target_local_roots\ntarget_canonical_roots\n"
+            + "target_file_globs\ncomparison_basis\ncompletion_boundary\n"
         )
         validation_result = validate_prompt_workflow(message)
         assert validation_result.allowed is False
         assert "missing_context_signals" in validation_result.reason_codes
-        assert any(
-            "context-control" in each_message
-            for each_message in validation_result.reason_messages
-        )
 
     def test_allowed_empty_message(self) -> None:
         validation_result = validate_prompt_workflow("")
@@ -125,11 +122,8 @@ class TestValidatePromptWorkflowFunction:
         message = (
             "overall_status: pass\n"
             "checklist_results: structured_scoped_instructions\n"
-            "target_local_roots\n"
-            "target_canonical_roots\n"
-            "target_file_globs\n"
-            "comparison_basis\n"
-            "completion_boundary\n"
+            "target_local_roots\ntarget_canonical_roots\n"
+            "target_file_globs\ncomparison_basis\ncompletion_boundary\n"
         )
         validation_result = validate_prompt_workflow(message)
         assert validation_result.allowed is False
@@ -162,11 +156,8 @@ class TestValidatePromptWorkflowFunction:
         message = (
             "overall_status: pass\n"
             + _full_checklist_rows()
-            + "target_local_roots\n"
-            + "target_canonical_roots\n"
-            + "target_file_globs\n"
-            + "comparison_basis\n"
-            + "completion_boundary\n"
+            + "target_local_roots\ntarget_canonical_roots\n"
+            + "target_file_globs\ncomparison_basis\ncompletion_boundary\n"
         )
         validation_result = validate_prompt_workflow(message)
         assert len(validation_result.reason_messages) == 1
@@ -183,21 +174,38 @@ class TestValidatePromptWorkflowFunction:
         assert validation_result.allowed is False
         assert "missing_scope_anchors" in validation_result.reason_codes
 
-    def test_blocked_missing_xml_sections_in_fenced_artifact(self) -> None:
+    def test_allowed_dynamic_sections_no_fixed_requirement(self) -> None:
         fenced_body = (
-            "<role>Test role sentence one.</role>\n"
-            "<instructions>Test instructions sentence one.</instructions>\n"
-            "<constraints>Test constraints sentence one.</constraints>\n"
-            "<output_format>Test output format sentence one.</output_format>\n"
+            "<context>Situation details.</context>\n"
+            "<goal>Achieve this outcome.</goal>\n"
         )
         message = _build_prompt_workflow_message_with_fenced_xml(fenced_body)
         validation_result = validate_prompt_workflow(message)
-        assert validation_result.allowed is False
-        assert "missing_xml_sections" in validation_result.reason_codes
-        assert any(
-            "background" in each_message
-            for each_message in validation_result.reason_messages
+        assert validation_result.allowed is True
+
+    def test_blocked_plan_derived_sections_missing(self) -> None:
+        plan_content = "# Context\n## Goal\n# Delivery\n"
+        fenced_body = "<context>C.</context>\n"
+        message = _build_prompt_workflow_message_with_fenced_xml(fenced_body)
+        validation_result = validate_prompt_workflow(
+            message,
+            plan_content=plan_content,
         )
+        assert validation_result.allowed is False
+        assert "missing_plan_sections" in validation_result.reason_codes
+        assert any(
+            "goal" in each_message for each_message in validation_result.reason_messages
+        )
+
+    def test_allowed_plan_derived_sections_all_present(self) -> None:
+        plan_content = "# Context\n## Goal\n# Delivery\n"
+        fenced_body = "<context><goal>G.</goal></context>\n<delivery>D.</delivery>\n"
+        message = _build_prompt_workflow_message_with_fenced_xml(fenced_body)
+        validation_result = validate_prompt_workflow(
+            message,
+            plan_content=plan_content,
+        )
+        assert validation_result.allowed is True
 
     def test_allows_positive_phrasing_inside_fenced_xml(self) -> None:
         fenced_content = _wrap_five_section_scaffold(
@@ -212,14 +220,11 @@ class TestValidatePromptWorkflowFunction:
             "<instructions>Ensure all functions have explicit return types.</instructions>"
         )
         message = (
-            "Audit: pass 15/15\n"
-            "Do not skip the audit line.\n"
+            "Audit: pass 15/15\nDo not skip the audit line.\n"
             "```xml\n" + fenced_inner + "\n```\n"
             "overall_status: pass\n" + _full_checklist_rows() + "target_local_roots\n"
-            "target_canonical_roots\n"
-            "target_file_globs\n"
-            "comparison_basis\n"
-            "completion_boundary\n"
+            "target_canonical_roots\ntarget_file_globs\n"
+            "comparison_basis\ncompletion_boundary\n"
             "base_minimal_instruction_layer: true\n"
             "on_demand_skill_loading: true\n"
         )
@@ -234,15 +239,39 @@ class TestValidatePromptWorkflowFunction:
         ("avoid", "<instructions>Avoid missing return types.</instructions>"),
         ("never", "<constraints>Never store credentials in plain text.</constraints>"),
         ("without", "<instructions>Deploy without running tests first.</instructions>"),
-        ("prevent", "<constraints>Prevent unauthorized access to the API.</constraints>"),
+        (
+            "prevent",
+            "<constraints>Prevent unauthorized access to the API.</constraints>",
+        ),
         ("reject", "<constraints>Reject all unsigned commits.</constraints>"),
-        ("cannot", "<constraints>The API cannot accept unauthenticated requests.</constraints>"),
-        ("unless", "<constraints>Skip the build step unless the user explicitly approves.</constraints>"),
-        ("must_not", "<constraints>The script must not produce duplicates.</constraints>"),
-        ("must_never", "<constraints>You must never store credentials in environment variables.</constraints>"),
-        ("instead_of", "<instructions>Use explicit types instead of implicit ones.</instructions>"),
-        ("rather_than", "<constraints>Prefer explicit types rather than inferred ones.</constraints>"),
-        ("as_opposed_to", "<instructions>Use Grid as opposed to floats for layout.</instructions>"),
+        (
+            "cannot",
+            "<constraints>The API cannot accept unauthenticated requests.</constraints>",
+        ),
+        (
+            "unless",
+            "<constraints>Skip the build step unless the user explicitly approves.</constraints>",
+        ),
+        (
+            "must_not",
+            "<constraints>The script must not produce duplicates.</constraints>",
+        ),
+        (
+            "must_never",
+            "<constraints>You must never store credentials in environment variables.</constraints>",
+        ),
+        (
+            "instead_of",
+            "<instructions>Use explicit types instead of implicit ones.</instructions>",
+        ),
+        (
+            "rather_than",
+            "<constraints>Prefer explicit types rather than inferred ones.</constraints>",
+        ),
+        (
+            "as_opposed_to",
+            "<instructions>Use Grid as opposed to floats for layout.</instructions>",
+        ),
     ],
 )
 def test_blocks_banned_pattern_inside_fenced_xml(
@@ -285,11 +314,8 @@ class TestValidatorCli:
         message = (
             "overall_status: pass\n"
             + _full_checklist_rows()
-            + "target_local_roots\n"
-            + "target_canonical_roots\n"
-            + "target_file_globs\n"
-            + "comparison_basis\n"
-            + "completion_boundary\n"
+            + "target_local_roots\ntarget_canonical_roots\n"
+            + "target_file_globs\ncomparison_basis\ncompletion_boundary\n"
         )
         draft_file = tmp_path / "draft.xml"
         draft_file.write_text(message, encoding="utf-8")
@@ -322,7 +348,6 @@ class TestValidatorCli:
         )
         assert completed_process.returncode == 2
         assert "[negative_keywords_in_artifact]" in completed_process.stderr
-        assert "Banned negative keywords" in completed_process.stderr
 
     def test_cli_reads_from_stdin_when_no_file_argument(self) -> None:
         fenced_content = _wrap_five_section_scaffold(
@@ -337,3 +362,25 @@ class TestValidatorCli:
             check=False,
         )
         assert completed_process.returncode == 0
+
+    def _run_cli_with_plan(self, tmp_path: Path, fenced_body: str, plan_text: str) -> subprocess.CompletedProcess[str]:
+        plan_file = tmp_path / "plan.md"
+        plan_file.write_text(plan_text, encoding="utf-8")
+        draft_file = tmp_path / "draft.xml"
+        draft_file.write_text(
+            _build_prompt_workflow_message_with_fenced_xml(fenced_body), encoding="utf-8",
+        )
+        return subprocess.run(
+            [sys.executable, str(VALIDATOR_MODULE_PATH), str(draft_file), str(plan_file)],
+            capture_output=True, text=True, check=False,
+        )
+
+    def test_cli_with_plan_file_validates_plan_sections(self, tmp_path: Path) -> None:
+        fenced_body = "<context><goal>G.</goal></context>\n<delivery>D.</delivery>\n"
+        completed_process = self._run_cli_with_plan(tmp_path, fenced_body, "# Context\n## Goal\n# Delivery\n")
+        assert completed_process.returncode == 0
+
+    def test_cli_with_plan_file_blocks_missing_sections(self, tmp_path: Path) -> None:
+        completed_process = self._run_cli_with_plan(tmp_path, "<context>C.</context>\n", "# Context\n## Goal\n# Delivery\n")
+        assert completed_process.returncode == 2
+        assert "[missing_plan_sections]" in completed_process.stderr

@@ -13,6 +13,8 @@ from prompt_workflow_gate_config import (
     COMPILED_NEGATIVE_KEYWORD_PATTERNS,
     DEBUG_INTENT_MARKERS,
     INTERNAL_OBJECT_MARKERS,
+    MAXIMUM_MARKDOWN_HEADER_DEPTH,
+    MINIMUM_TOP_LEVEL_TAG_COUNT,
     PROMPT_WORKFLOW_RESPONSE_MARKERS,
     REQUIRED_CHECKLIST_ROWS,
     REQUIRED_SCOPE_ANCHORS,
@@ -181,6 +183,53 @@ def extract_fenced_xml_content_from_export(text: str) -> str:
     """Extract fenced XML from a canonical message or flattened transcript export."""
     normalized = normalize_prompt_workflow_export(text)
     return extract_fenced_xml_content(normalized)
+
+def _normalize_header_to_tag_name(header_text: str) -> str:
+    lowered = header_text.strip().lower()
+    replaced = lowered.replace(" ", "_")
+    cleaned = re.sub(r"[^a-z0-9_]", "", replaced)
+    collapsed = re.sub(r"_{2,}", "_", cleaned)
+    return collapsed.strip("_")
+
+
+def extract_plan_section_headers(
+    plan_markdown: str,
+) -> list[tuple[int, str]]:
+    header_pattern = re.compile(
+        rf"^(#{{1,{MAXIMUM_MARKDOWN_HEADER_DEPTH}}})\s+(.+)$",
+    )
+    headers: list[tuple[int, str]] = []
+    for each_line in plan_markdown.splitlines():
+        match = header_pattern.match(each_line.strip())
+        if match:
+            depth = len(match.group(1))
+            tag_name = _normalize_header_to_tag_name(match.group(2))
+            if tag_name:
+                headers.append((depth, tag_name))
+    return headers
+
+
+def build_expected_tag_list(
+    headers: list[tuple[int, str]],
+) -> list[str]:
+    return [tag_name for _depth, tag_name in headers]
+
+
+def missing_plan_derived_xml_sections(
+    text: str,
+    expected_sections: list[str],
+) -> list[str]:
+    fenced_body = extract_fenced_xml_content(text)
+    if not fenced_body.strip():
+        return list(expected_sections)
+    missing_sections: list[str] = []
+    for section_name in expected_sections:
+        open_tag = re.compile(rf"<{re.escape(section_name)}(\s[^>]*)?>")
+        close_tag = re.compile(rf"</{re.escape(section_name)}>")
+        if not open_tag.search(fenced_body) or not close_tag.search(fenced_body):
+            missing_sections.append(section_name)
+    return missing_sections
+
 
 def missing_required_xml_sections(text: str) -> list[str]:
     fenced_body = extract_fenced_xml_content(text)
