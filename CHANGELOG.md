@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/jl-cmd/prompt-generator/compare/v1.4.0...v1.5.0) (2026-04-15)
+
+
+### Features
+
+* add automated eval runner for pmid and pmin (10/10 pass) ([#23](https://github.com/jl-cmd/prompt-generator/issues/23)) ([8fcbfe3](https://github.com/jl-cmd/prompt-generator/commit/8fcbfe3ced815c9606e93f8fe97c4edbf027a0d6))
+
 ## [1.4.0](https://github.com/jl-cmd/prompt-generator/compare/v1.3.0...v1.4.0) (2026-04-15)
 
 
