@@ -2,8 +2,8 @@
 name: pmin
 description: >-
   Single-pass XML formatter — takes a raw input block, emits one clean xml
-  fence with context-adapted tags, and stops. Zero tool calls, zero plan mode,
-  zero validation loop.
+  fence with context-adapted tags and an Outcome digest. Zero tool calls, zero
+  plan mode, zero validation loop.
 ---
 
 # pmin
@@ -14,7 +14,7 @@ description: >-
 
 ## Flow
 
-Read the raw input block in the invocation message. Emit one xml fence. Stop.
+Read the raw input block in the invocation message. Emit one xml fence followed by an Outcome digest. Stop.
 
 Zero tool calls. Zero AskUserQuestion rounds. Zero plan mode entries.
 
@@ -33,7 +33,7 @@ Start from this structure and adapt it using all available context:
 - **Session context** — prior conversation turns that clarify intent, audience, or constraints fold directly into tag content; incorporate what is already known
 - **User specifics** — any explicit framing, target agent, or format the user stated in the `/pmin` invocation is the authoritative input; use it as the primary shaping signal
 
-Every tag used must be opened and closed. Return one xml fence — the fence characters only, with zero surrounding prose.
+Every tag used must be opened and closed. Return one xml fence followed immediately by an Outcome digest — the fence first, then the digest, with zero other surrounding prose.
 
 ## Quality rules
 
@@ -62,5 +62,4 @@ This skill is bounded to: read the input, emit the fence, stop. The following ar
 - File-based validation loop
 - Scope anchors (target_local_roots, target_canonical_roots, target_file_globs, comparison_basis, completion_boundary)
 - Checklist rows
-- Outcome digest
 - Outcome preview gate
