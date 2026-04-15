@@ -1,6 +1,6 @@
 # @jl-cmd/prompt-generator
 
-Standalone **prompt-generator** and **agent-prompt** skills for Claude Code, plus prompt-workflow hooks and rules. Install with `npx`. Layout matches [claude-code-config](https://github.com/jl-cmd/claude-code-config) for drop-in parity.
+Standalone **prompt-generator** and **agent-prompt** skills for Claude Code, plus prompt-workflow hooks and rules. Install with `npx`. Layout matches [claude-code-config](https://github.com/jl-cmd/claude-code-config).
 
 ## Install (Claude Code)
 
@@ -13,13 +13,13 @@ This copies:
 - `skills/prompt-generator/` and `skills/agent-prompt/` → `~/.claude/skills/<skill-name>/`
 - Hook scripts (under `hooks/`, including `blocking/` and tests) → `~/.claude/hooks/`
 - `rules/prompt-workflow-context-controls.md` → `~/.claude/rules/`
-- A manifest at `~/.claude/.prompt-generator-manifest.json`
+- A manifest at `~/.claude/.prompt-generator-manifest.json
 
-Hook scripts on disk are separate from **registration**: lifecycle hooks are wired in Claude Code [settings](https://docs.anthropic.com/en/docs/claude-code/settings) using the [hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) schema (`~/.claude/settings.json`, `.claude/settings.json`, or `.claude/settings.local.json`) so those commands run when you want them to.
+Hook scripts on disk are separate from **registration**: lifecycle hooks are wired in Claude Code [settings](https://docs.anthropic.com/en/docs/claude-code/settings) using the [hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) key in `settings.json`.
 
 ## Install (Cursor, Third-party skills)
 
-In Cursor, enable **Third-party skills** under **Settings → Features**. Cursor loads Claude-format hook definitions from `.claude/settings.local.json`, `.claude/settings.json`, and `~/.claude/settings.json` as described in [Third-party hooks](https://cursor.com/docs/reference/third-party-hooks). This package still places hook scripts under `~/.claude/hooks/`, so paths referenced from settings stay valid.
+In Cursor, enable **Third-party skills** under **Settings → Features**. Cursor loads Claude-format hook definitions from `.claude/settings.local.json`, `.claude/settings.json`, and `~/.claude/settings.json`.
 
 Native Cursor hooks use `hooks.json` (`version: 1`, JSON on stdin/stdout, exit code `2` to block); see [Hooks](https://cursor.com/docs/hooks).
 
@@ -27,15 +27,15 @@ Native Cursor hooks use `hooks.json` (`version: 1`, JSON on stdin/stdout, exit c
 
 ### `prompt-generator` (`/prompt-generator`)
 
-Authors a repository-grounded XML prompt: discovery, `AskUserQuestion`, drafting with refinement and the file-based validation loop, an Outcome preview gate, then a single handoff with one markdown code fence labeled `xml` plus `## Outcome digest` per `TARGET_OUTPUT.md`. Delivers a paste-ready artifact; execution of that work is a separate step.
+Authors a repository-grounded XML prompt: discovery, `AskUserQuestion`, drafting with refinement and the file-based validation loop, an Outcome preview gate, then a single handoff with one markdown code fence and an Outcome digest.
 
 ### `agent-prompt` (`/agent-prompt`)
 
-Runs the **same** prompt-generator flow through that final handoff (discovery → preview → fenced XML + digest). Refinement, validation, and preview rounds live entirely inside prompt-generator; agent-prompt starts after that handoff.
+Runs the **same** prompt-generator flow through that final handoff (discovery → preview → fenced XML + digest). Refinement, validation, and preview rounds live entirely inside prompt-generator; agent-prompt starts after the fence is emitted.
 
-After the handoff, it sends **one** execution `AskUserQuestion` (**Launch it**, **Edit first**, **Cancel**). On **Launch it**, it spawns a background Agent/Task with `run_in_background: true` and `prompt` set to the **approved XML** from the preview (full content, no summarization—the execution payload for a new context).
+After the handoff, it sends **one** execution `AskUserQuestion` (**Launch it**, **Edit first**, **Cancel**). On **Launch it**, it spawns a background Agent/Task with `run_in_background: true` and `prompt` set to the validated XML fence.
 
-Typical **logical** role → **Cursor Task** `subagent_type` mapping (always confirm against your live tool schema—see `skills/agent-prompt/REFERENCE.md`; runtime reads use `../prompt-generator/` from the installed sibling skill directory):
+Typical **logical** role → **Cursor Task** `subagent_type` mapping (always confirm against your live tool schema—see `skills/agent-prompt/REFERENCE.md`; runtime reads use `../prompt-generator/` from the agent-prompt skill directory):
 
 | Task type | subagent_type | mode |
 | --- | --- | --- |
@@ -46,9 +46,19 @@ Typical **logical** role → **Cursor Task** `subagent_type` mapping (always con
 
 Use `/prompt-generator` when only the artifact is needed; use `/agent-prompt` when the user wants a subagent to execute after approval.
 
+### `pmin` (`/pmin`)
+
+Single-pass XML formatter — takes a raw input block, emits one clean `xml` fence with context-adapted tags and an Outcome digest. Zero tool calls, zero plan mode, zero validation loop.
+
+### `pmid` (`/pmid`)
+
+Mid-tier XML formatter — takes a raw input block, drafts context-adapted XML, runs the 15-row compliance audit and file-based validation loop, then emits the validated fence and Outcome digest. Zero plan mode, zero `AskUserQuestion`, zero Outcome preview gate.
+
+Use `/pmin` for a quick single-pass format; use `/pmid` when validation is needed without the full interactive flow; use `/prompt-generator` for the full guided authoring experience.
+
 ## Hooks and rules
 
-- **`hooks/blocking/`** — Shared validator and gate helpers (for example `prompt_workflow_validate.py`, `prompt_workflow_gate_core.py`). Spec: `hooks/HOOK_SPECS_PROMPT_WORKFLOW.md`.
+- **`hooks/blocking/`** — Shared validator and gate helpers (for example `prompt_workflow_validate.py`, `prompt_workflow_gate_core.py`, `prompt_workflow_gate_config.py`, `prompt_workflow_clipboard.py`). Spec: `hooks/HOOK_SPECS_PROMPT_WORKFLOW.md`.
 - **`rules/prompt-workflow-context-controls.md`** — Stable policy pointers for prompt-workflow context.
 
 ## Claude Code ↔ Cursor (hooks)
@@ -80,23 +90,6 @@ Tool name mapping for shared hook tooling (same source):
 | `WebFetch` | — | No |
 | `WebSearch` | — | No |
 
-## Releases (maintainers)
-
-This repo uses [Release Please](https://github.com/googleapis/release-please) ([action](https://github.com/googleapis/release-please-action)) on **`main`**:
-
-Maintainers should **squash merge** into `main` and use a **conventional PR title**, because that title becomes the default squash-merge commit subject Release Please reads. **Merge commits** are fine only when the **merge commit message** itself is conventional (for example not the default `Merge pull request #…` title, which Release Please does not treat as a conventional changelog entry).
-
-1. Land commits in [Conventional Commits](https://www.conventionalcommits.org/) form (`feat:`, `fix:`, `feat!:` for breaking, etc.).
-2. Release Please opens or updates a **release PR** (changelog + version bump in `package.json`).
-3. **Merge that PR** when you want to ship. The workflow then creates a **GitHub Release** and runs **`npm publish`** for `@jl-cmd/prompt-generator`.
-
-**Publish auth (pick one):**
-
-- **Trusted Publishing (recommended):** On the package → **Settings → Trusted Publisher**, set **GitHub Actions**, org **`jl-cmd`**, repo **`prompt-generator`**, workflow filename **`release-please.yml`** (filename only, must match `.github/workflows/release-please.yml`). The workflow uses **`id-token: write`** and **Node 24** so the npm CLI can publish via [OIDC](https://docs.npmjs.com/trusted-publishers) without **`NPM_TOKEN`**.
-- **Token fallback:** add an **`NPM_TOKEN`** secret and restore `NODE_AUTH_TOKEN` on the `npm publish` step if you are not using Trusted Publishing yet.
-
-**Optional:** use a **PAT** instead of `GITHUB_TOKEN` for the Release Please step if release PRs must trigger other workflows ([GitHub limitation](https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow) on `GITHUB_TOKEN`-created events).
-
 ## License
 
 MIT — see [LICENSE](LICENSE).
@@ -104,5 +97,3 @@ MIT — see [LICENSE](LICENSE).
 ## Issues
 
 [github.com/jl-cmd/prompt-generator/issues](https://github.com/jl-cmd/prompt-generator/issues)
-
-
