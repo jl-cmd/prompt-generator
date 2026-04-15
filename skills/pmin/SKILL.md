@@ -1,9 +1,9 @@
 ---
 name: pmin
 description: >-
-  Single-pass XML formatter — takes a raw input block and returns a clean xml
-  fence with role, instructions, and output_format tags. No plan mode, no
-  searches, no validation loop, no digest.
+  Single-pass XML formatter — takes a raw input block, emits one clean xml
+  fence with context-adapted tags, and stops. Zero tool calls, zero plan mode,
+  zero validation loop.
 ---
 
 # pmin
@@ -26,7 +26,14 @@ Zero tool calls. Zero AskUserQuestion rounds. Zero plan mode entries.
 <output_format>...</output_format>
 ```
 
-Fill each tag with a clean structural improvement of the input block. Every tag must be opened and closed in the output fence.
+Start from this structure and adapt it using all available context:
+
+- **Input block** — sections the user's raw text already implies (e.g. a block that describes background + steps + format maps naturally to `<background>`, `<instructions>`, `<output_format>`)
+- **Repo and folder context** — if Claude already knows the project's conventions (hook layout, skill format, test patterns), let that shape tag names and content
+- **Session context** — prior conversation turns that clarify intent, audience, or constraints fold directly into tag content; incorporate what is already known
+- **User specifics** — any explicit framing, target agent, or format the user stated in the `/pmin` invocation is the authoritative input; use it as the primary shaping signal
+
+Every tag used must be opened and closed. Return one xml fence — the fence characters only, with zero surrounding prose.
 
 ## Quality rules
 
@@ -44,9 +51,9 @@ The validator treats any response containing two or more strings from `PROMPT_WO
 
 If the raw input block contains any of these marker strings, paraphrase or strip them before emitting the xml fence. The emitted fence must contain zero marker strings so the validator pass-through remains guaranteed.
 
-## Explicit exclusions
+## Scope boundary
 
-This skill performs none of the following:
+This skill is bounded to: read the input, emit the fence, stop. The following are outside that boundary and stay out of every invocation:
 
 - EnterPlanMode or ExitPlanMode
 - AskUserQuestion
