@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/jl-cmd/prompt-generator/compare/v1.3.0...v1.4.0) (2026-04-15)
+
+
+### Features
+
+* add outcome digest and scope-boundary evals for prompt-generator, pmid, and pmin ([#20](https://github.com/jl-cmd/prompt-generator/issues/20)) ([4e714d3](https://github.com/jl-cmd/prompt-generator/commit/4e714d34a1d441bad217fc8050b1ce42a4b3dcb9))
+
 ## [1.3.0](https://github.com/jl-cmd/prompt-generator/compare/v1.2.1...v1.3.0) (2026-04-15)
 
 
