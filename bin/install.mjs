@@ -10,7 +10,7 @@ const PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST_FILE = join(CLAUDE_HOME, '.prompt-generator-manifest.json');
 const PACKAGE_NAME = '@jl-cmd/prompt-generator';
 
-const SKILLS = ['prompt-generator', 'agent-prompt'];
+const SKILLS = ['prompt-generator', 'agent-prompt', 'pmid', 'pmin'];
 
 const HOOK_FILES = [
     'blocking/prompt_workflow_gate_config.py',
