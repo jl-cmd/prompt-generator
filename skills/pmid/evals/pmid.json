@@ -12,7 +12,7 @@
       "expected_behavior": [
         "Output is exactly one xml fence followed immediately by ## Outcome digest — zero prose before the fence, zero prose after the digest",
         "The xml fence contains a structured XML prompt wrapping the user's audit request — not the result of performing the audit",
-        "Zero tool calls made: no file reads, no Glob, no Zoekt searches, no subagent spawns",
+        "Only prompt-validation workflow operations are allowed: writing data/prompts/.draft-prompt.xml and running the validator CLI; no repo file reads, no Glob, no Zoekt searches, and no subagent spawns",
         "The assistant produces no audit output (tables, line-by-line findings, executive summaries, priority action lists) before, inside, or after the xml fence",
         "The assistant does not self-correct mid-turn with phrases like 'You're right — you asked for a prompt, not for me to execute the audit myself' — the scope boundary is respected from the first token",
         "## Outcome digest contains all four required bullets: **What it does**, **Key inputs**, **Done when**, **Quick sample**",
@@ -51,7 +51,7 @@
       "prompt": "/pmid Review packages/samsung-automation/ for hardcoded selectors. Output a JSON array: [{file, line, selector, suggested_constant_name}].",
       "files": [],
       "expected_behavior": [
-        "Subagent writes complete output (xml fence + ## Outcome digest + hook validation block) to data/prompts/.draft-prompt.xml",
+        "pmid writes the complete draft output (xml fence + ## Outcome digest + hook validation block) to data/prompts/.draft-prompt.xml",
         "prompt_workflow_validate.py runs against the draft; violations at exit 2 are fixed and re-validated until exit 0",
         "Hook validation block is stripped before user-facing output",
         "User-facing output is exactly the validated xml fence followed by ## Outcome digest — no validation metadata visible"
