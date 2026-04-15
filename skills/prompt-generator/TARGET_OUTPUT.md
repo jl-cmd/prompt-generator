@@ -76,6 +76,14 @@ This file is the **target output spec** for eval-driven iteration of the `prompt
 
 **Eval expectations:** The generated XML sections reflect the plan's curated focus areas, not the noisy thread.
 
+## pmin skill
+
+- **Trigger:** `/pmin` followed by a raw input block in the invocation message.
+- **Flow:** Single pass, zero tool calls, zero AskUserQuestion rounds, zero plan mode entries. Read the input block, emit one xml fence, stop.
+- **Output:** One xml fence with `<role>`, `<instructions>`, and `<output_format>` tags — no Outcome digest, no preview gate, no audit table, no scope anchors, no checklist rows.
+- **Quality rules still active:** Positive framing throughout; direct imperatives that affirm what to do; full words only (zero abbreviations).
+- **Eval expectations:** Output is a clean structural improvement of the input. Zero prose before or after the fence.
+
 ## Structural invariant A — Tool-free artifact output
 
 - **Order:** `EnterPlanMode` (discovery + **AskUserQuestion** inside plan mode) → plan approval → subagent (draft + internal audit) → **Outcome preview** turn (`### Outcome preview` + **AskUserQuestion**) → optional refinement loops → **one** final assistant message.

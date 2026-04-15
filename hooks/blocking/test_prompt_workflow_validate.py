@@ -231,6 +231,17 @@ class TestValidatePromptWorkflowFunction:
         validation_result = validate_prompt_workflow(message)
         assert validation_result.allowed is True
 
+    def test_minimal_pmin_xml_response_passes_validator(self) -> None:
+        minimal_pmin_response = (
+            "```xml\n"
+            "<role>Format the raw input block as clean XML.</role>\n"
+            "<instructions>Take the raw input block and emit one xml fence.</instructions>\n"
+            "<output_format>One xml fence containing role, instructions, and output_format tags.</output_format>\n"
+            "```\n"
+        )
+        validation_result = validate_prompt_workflow(minimal_pmin_response)
+        assert validation_result.allowed is True
+
 
 @pytest.mark.parametrize(
     ("banned_pattern_name", "fenced_xml_content"),
