@@ -76,6 +76,22 @@ This file is the **target output spec** for eval-driven iteration of the `prompt
 
 **Eval expectations:** The generated XML sections reflect the plan's curated focus areas, not the noisy thread.
 
+## pmin skill
+
+- **Trigger:** `/pmin` followed by a raw input block in the invocation message.
+- **Flow:** Single pass, zero tool calls, zero AskUserQuestion rounds, zero plan mode entries. Read the input block, emit one xml fence, then emit `## Outcome digest` immediately after the closing fence, then stop.
+- **Output:** One xml fence with tags adapted to the input context (default: `<role>`, `<instructions>`, `<output_format>`; extend when the input or repo context implies additional sections), followed immediately by a markdown section headed exactly `## Outcome digest` — zero preview gate, zero audit table, zero scope anchors, zero checklist rows.
+- **Quality rules still active:** Positive framing throughout; direct imperatives that affirm what to do; full words in prose only, except required standard format acronyms such as XML.
+- **Eval expectations:** Output is a clean structural improvement of the input. Zero prose before the fence or after the `## Outcome digest` section.
+
+## pmid skill
+
+- **Trigger:** `/pmid` followed by a raw input block in the invocation message.
+- **Flow:** Single pass — draft context-adapted XML, run the 15-row compliance audit and file-based validation loop (`data/prompts/.draft-prompt.xml`), fix violations until exit 0, strip the hook validation block, emit one xml fence, then emit `## Outcome digest` immediately after the closing fence, delete temp file.
+- **Output:** One validated xml fence with context-adapted tags followed immediately by a markdown section headed exactly `## Outcome digest` — zero preview gate, zero audit table visible to user, zero scope anchors or checklist rows in the user-facing fence.
+- **Quality rules still active:** All pmin rules (positive framing, full words in prose, established technical acronyms allowed) plus the draft must satisfy all validator gates before emission.
+- **Eval expectations:** Output passes `prompt_workflow_validate.py` at exit 0. Fence is a clean structural improvement of the input. The `## Outcome digest` section is present and complete.
+
 ## Structural invariant A — Tool-free artifact output
 
 - **Order:** `EnterPlanMode` (discovery + **AskUserQuestion** inside plan mode) → plan approval → subagent (draft + internal audit) → **Outcome preview** turn (`### Outcome preview` + **AskUserQuestion**) → optional refinement loops → **one** final assistant message.
