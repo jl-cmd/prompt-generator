@@ -198,8 +198,14 @@ def extract_plan_section_headers(
         rf"^(#{{1,{MAXIMUM_MARKDOWN_HEADER_DEPTH}}})\s+(.+)$",
     )
     headers: list[tuple[int, str]] = []
+    inside_fenced_block = False
     for each_line in plan_markdown.splitlines():
-        match = header_pattern.match(each_line.strip())
+        if each_line.startswith("```") or each_line.startswith("~~~"):
+            inside_fenced_block = not inside_fenced_block
+            continue
+        if inside_fenced_block:
+            continue
+        match = header_pattern.match(each_line)
         if match:
             depth = len(match.group(1))
             tag_name = _normalize_header_to_tag_name(match.group(2))
