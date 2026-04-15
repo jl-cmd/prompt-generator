@@ -188,7 +188,10 @@ def _normalize_header_to_tag_name(header_text: str) -> str:
     replaced = lowered.replace(" ", "_")
     cleaned = re.sub(r"[^a-z0-9_]", "", replaced)
     collapsed = re.sub(r"_{2,}", "_", cleaned)
-    return collapsed.strip("_")
+    result = collapsed.strip("_")
+    if result and result[0].isdigit():
+        result = "section_" + result
+    return result
 
 
 def extract_plan_section_headers(
