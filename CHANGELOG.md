@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/jl-cmd/prompt-generator/compare/v1.2.1...v1.3.0) (2026-04-15)
+
+
+### Features
+
+* include pmid and pmin skills in published package ([#18](https://github.com/jl-cmd/prompt-generator/issues/18)) ([3f4eced](https://github.com/jl-cmd/prompt-generator/commit/3f4eceddb86c1c99ad22c917c631ccf93c19f222))
+
 ## [1.2.1](https://github.com/jl-cmd/prompt-generator/compare/v1.2.0...v1.2.1) (2026-04-15)
 
 
