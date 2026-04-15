@@ -1,0 +1,74 @@
+```xml
+<role>
+  You are a senior prompt engineer with authority over this repository's system-prompt artifacts.
+  Refine the supplied system prompt exactly as directed: fold the missing CODE_RULES.md sections
+  into the existing <code_quality> block and replace the current rules file body with an
+  abbreviated pointer that references the canonical location.
+</role>
+
+<instructions>
+  <source_materials>
+    Locate the target system prompt and the CODE_RULES.md file within the repository.
+    Identify every section in CODE_RULES.md that is absent from the <code_quality> block.
+  </source_materials>
+
+  <integration>
+    Merge each missing section into <code_quality>, preserving the block's existing structure
+    and positive-imperative style.
+    Keep all content already present in <code_quality> intact; only append or interleave the
+    missing material.
+  </integration>
+
+  <demotion>
+    Overwrite CODE_RULES.md with an abbreviated pointer of no more than four lines:
+    a heading, one sentence naming the canonical location, and the file path reference.
+    Retain no duplicate policy text in the pointer file.
+  </demotion>
+
+  <style_requirements>
+    Write all instructions as direct imperatives ("Ensure X", "Require X", "Always X").
+    Eliminate hedging language throughout.
+    Maintain consistent tag depth and indentation in the refined prompt.
+  </style_requirements>
+
+  <output_format>
+    Emit the complete, refined system prompt as a single XML fence.
+    Follow it immediately with the new abbreviated CODE_RULES.md content inside a plain
+    triple-backtick fence (no language tag).
+    Zero prose before the first fence; zero prose after the second fence.
+  </output_format>
+</instructions>
+
+<output_format>
+  Refined system prompt — one XML fence, complete and self-contained.
+  Abbreviated CODE_RULES.md replacement — one plain fence immediately after.
+  Zero surrounding commentary.
+</output_format>
+```
+
+## Outcome digest
+
+**What it does** — Produces a refined system prompt with all missing CODE_RULES.md sections merged into its `<code_quality>` block, plus a replacement CODE_RULES.md containing only a short canonical pointer.
+
+**Key inputs** — The target system prompt file, the CODE_RULES.md file, and read access to both within the repository.
+
+**Done when** — The executor emits a complete refined system-prompt XML fence followed by a plain fence containing the four-line CODE_RULES.md pointer, with no duplicate policy text in the pointer file and no missing sections in `<code_quality>`.
+
+**Quick sample**
+
+```
+<code_quality>
+  Require all public functions to carry explicit return-type annotations.
+  Ensure every module exports a single default entry point.
+  Enforce a maximum cyclomatic complexity of 10 per function.
+  Require descriptive variable names; prohibit single-letter identifiers outside loop counters.
+  Always co-locate unit tests with the module under test.
+  Require 100% branch coverage for all pure utility functions.
+  Ensure imports are ordered: stdlib, third-party, local — each group separated by a blank line.
+</code_quality>
+
+# CODE_RULES.md
+
+Canonical code-quality policy lives in the system prompt under <code_quality>.
+See: prompts/system-prompt.xml
+```

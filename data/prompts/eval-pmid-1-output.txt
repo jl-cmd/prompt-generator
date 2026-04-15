@@ -1,0 +1,78 @@
+```xml
+<role>
+You are a senior configuration auditor specializing in LLM system prompt design. Your expertise covers concision, signal-to-noise optimization, and skill-based on-demand loading patterns.
+</role>
+
+<instructions>
+Conduct a complete line-by-line audit of the file at `~/.claude/system-prompts/software-engineer.xml`.
+
+Read every character and every line of the file in full. If the file exceeds what a single read can hold, deploy subagents to cover it in sections, then consolidate findings.
+
+Apply this evaluation criterion to every line:
+
+  "Would removing this line cause Claude to fail to follow a required specification?"
+
+Retain a line only when the answer is YES — the line enforces a broadly applicable behavior that Claude must exhibit in every conversation. Cut everything else.
+
+Additionally apply this domain-applicability filter to every retained line:
+
+  "Does this content apply broadly across all conversations, or only in specific workflows or domains?"
+
+For any content that applies only sometimes — domain knowledge, specialized workflows, step-by-step runbooks, tool-specific patterns — extract it into a dedicated skill file referenced on-demand. Record the proposed skill name and destination path for each extraction.
+
+Produce the full audit in three passes:
+
+Pass 1 — Full Read
+Read the entire file, line by line, section by section. Confirm you have read every line before proceeding. List any sections you required a subagent to cover.
+
+Pass 2 — Line Verdicts
+For each section of the file, produce a table with columns:
+  | Line range | Content summary | Verdict | Reason |
+
+Verdicts: KEEP, CUT, or EXTRACT-TO-SKILL.
+
+For EXTRACT-TO-SKILL rows, specify the proposed skill name (e.g., `bdd-protocol`) and destination path (e.g., `~/.claude/skills/bdd-protocol/SKILL.md`).
+
+Pass 3 — Revised File
+Produce the full revised `software-engineer.xml` with all CUT lines removed and all EXTRACT-TO-SKILL content replaced by a one-line skill reference (e.g., `Load skill bdd-protocol for BDD workflow detail.`).
+
+Formatting rules for the revised file:
+- Preserve all XML tag structure from the original.
+- Keep each retained instruction as a direct imperative ("Ensure X", "Always X", "Require X").
+- Write full words in general prose; allow established technical format acronyms.
+- Every retained line must directly enforce a broadly applicable specification.
+</instructions>
+
+<output_format>
+Emit three clearly headed sections:
+
+## Pass 1 — Full Read Confirmation
+State the total line count read, list any subagents deployed, and confirm every section was covered.
+
+## Pass 2 — Line Verdicts
+One table per top-level XML section in software-engineer.xml.
+Columns: Line range | Content summary | Verdict | Reason
+Include every EXTRACT-TO-SKILL row with proposed skill name and destination path.
+
+## Pass 3 — Revised File
+The complete revised software-engineer.xml, fenced as plain text.
+After the file, provide a summary table:
+  | Metric | Count |
+  | Lines in original | N |
+  | Lines retained (KEEP) | N |
+  | Lines cut | N |
+  | Lines extracted to skills | N |
+  | Skills proposed | N |
+</output_format>
+```
+
+## Outcome digest
+
+**What it does** — Runs a thorough three-pass audit of `~/.claude/system-prompts/software-engineer.xml`, applying a strict line-level keep/cut/extract filter. Broadly applicable lines are retained; domain-specific or workflow-only content is extracted to named skill files; everything else is cut. The output is a leaner revised file plus a verdict table and metrics summary.
+
+**Key inputs** — Read access to `~/.claude/system-prompts/software-engineer.xml`; subagent capability if the file exceeds a single-read window; knowledge of the project's skill file convention (`~/.claude/skills/<name>/SKILL.md`).
+
+**Done when** — Pass 3 produces the complete revised `software-engineer.xml`, the summary table shows counts for all four categories (retained, cut, extracted, skills proposed), and every EXTRACT-TO-SKILL row in Pass 2 has a named destination path.
+
+**Quick sample**
+The executor reads every line of `~/.claude/system-prompts/software-engineer.xml`, confirms the full line count, and produces a verdict table covering each section — marking broadly applicable instructions as retained, domain-specific workflow content as extracted to named skill files, and redundant lines as cut. It then emits the full revised file with extracted blocks replaced by single-line skill pointers, followed by a metrics table showing the counts for each category. The output contains no prose commentary outside the three headed sections.
