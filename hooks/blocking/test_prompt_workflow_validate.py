@@ -238,6 +238,9 @@ class TestValidatePromptWorkflowFunction:
             "<instructions>Take the raw input block and emit one xml fence.</instructions>\n"
             "<output_format>One xml fence containing role, instructions, and output_format tags.</output_format>\n"
             "```\n"
+            "\n"
+            "## Outcome digest\n"
+            "- Produced one XML fence artifact.\n"
         )
         gate_outcome = validate_prompt_workflow(pmin_xml_fence_message)
         assert gate_outcome.allowed is True
