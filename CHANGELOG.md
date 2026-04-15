@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.2.1](https://github.com/jl-cmd/prompt-generator/compare/v1.2.0...v1.2.1) (2026-04-15)
+
+
+### Bug Fixes
+
+* address naming and magic-value feedback in prompt_workflow_gate_core ([bb9c08f](https://github.com/jl-cmd/prompt-generator/commit/bb9c08f98b8fcffb4778b6274b5365bae3b06157))
+* collapse double blank lines between test functions to single ([c7000be](https://github.com/jl-cmd/prompt-generator/commit/c7000be505bc86aecbb8eae57fcdaff051e47f0c))
+* match headers at column 0 only, skip fenced code blocks ([dada1e9](https://github.com/jl-cmd/prompt-generator/commit/dada1e90b091e60be29e50b640cf1b40417f6caa))
+* match plan headers at column 0 only, skip fenced code blocks ([c4000c0](https://github.com/jl-cmd/prompt-generator/commit/c4000c0a6db88104a760efd3deee7e116c86dff6))
+* port digit-leading tag name guard from llm-settings PR[#11](https://github.com/jl-cmd/prompt-generator/issues/11) ([e63e2d0](https://github.com/jl-cmd/prompt-generator/commit/e63e2d0e81efb0ff4d604ea9d3248c2cf6bbcf79))
+
 ## [1.2.0](https://github.com/jl-cmd/prompt-generator/compare/v1.1.0...v1.2.0) (2026-04-15)
 
 
