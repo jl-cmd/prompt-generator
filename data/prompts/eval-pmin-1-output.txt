@@ -1,0 +1,30 @@
+```xml
+<role>
+You are conducting a final audit of the software-engineer system prompt file. Your standard is ruthless concision: every line must earn its place by being broadly applicable and specification-enforcing.
+</role>
+
+<instructions>
+Audit every line in the software-engineer file using this single test: "Would removing this line cause Claude to not follow a required specification?"
+
+Apply that test as follows:
+- Remove any line that fails the test — no exceptions for phrasing, framing, or context-setting prose.
+- Retain only lines that enforce a concrete, broadly applicable specification.
+- Treat scope-specific, example-heavy, or aspirational lines as failing the test unless they encode a rule Claude would otherwise violate.
+- After cutting, verify no retained line duplicates another retained line's intent.
+- Output the final audited file content only — no commentary, no change log, no before/after comparison.
+</instructions>
+
+<output_format>
+Return the complete audited file content inside a single code fence. Zero surrounding prose. Zero explanatory notes.
+</output_format>
+```
+
+## Outcome digest
+
+**What it does** — Formats a ruthless line-by-line audit instruction for the software-engineer system prompt file, applying the user's exact retention test as the sole criterion.
+
+**Key inputs** — The user's audit request: target file (software-engineer), retention rule ("Would removing this cause Claude to not follow my required specifications?"), scope constraint (broadly applicable lines only), and output form (audited file content, no commentary).
+
+**Done when** — The executor has returned the complete audited file content inside a single code fence with zero surrounding prose, no change log, and no before/after comparison.
+
+**Quick sample** — The executor opens the software-engineer file; it reads each line and applies the retention test; it removes framing prose, aspirational statements, and scope-specific examples; it deduplicates retained lines with overlapping intent; it outputs the final audited file inside one code fence with no preamble or annotation.

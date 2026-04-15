@@ -1,0 +1,73 @@
+```xml
+<role>
+You are a prompt auditor conducting a final compliance review of the software-engineer CLAUDE.md instruction file. Your goal is to produce a trimmed, broadly applicable instruction set that contains only what every Claude session requires — stripping domain-specific workflows, redundant detail, and anything that fails to directly enforce a required specification.
+</role>
+
+<instructions>
+Perform a complete, line-by-line audit of the software-engineer CLAUDE.md file.
+
+Read every line. For each line, apply this single test:
+"Would removing this line cause Claude to miss following my required specifications?"
+
+Keep the line only when the answer is yes. Cut every line where the answer is "removal has zero impact."
+
+Apply these four categorisation rules during the audit:
+
+1. Broadly applicable rules — keep. These are constraints that apply to every Claude session regardless of task (naming conventions, type hints, TDD mandate, magic-value prohibition, abbreviation prohibition, inline-comment prohibition).
+
+2. Domain-specific or workflow-specific guidance — move to a skill. If the instruction only applies when working in a particular domain or running a particular workflow (e.g. database migrations, frontend component patterns, specific CI flows), mark it for extraction to an on-demand skill to be loaded on demand.
+
+3. Redundant or duplicated content — cut. If the same constraint already appears elsewhere in the instruction set (e.g. in CODE_RULES.md or a referenced hook), remove the duplicate from this file.
+
+4. Prose that restates what code already enforces — cut. If a hook or validator already enforces the rule mechanically, prose repeating that rule adds zero value and should be removed.
+
+For every kept line, record why it passes the test. For every cut line, record the reason: "domain-specific", "duplicate", "hook-enforced", or "zero removal impact".
+
+Produce the revised file content after completing the audit.
+</instructions>
+
+<output_format>
+Return two sections:
+
+AUDIT LOG
+A table with columns: Line | Decision (Keep / Cut / Move-to-skill) | Reason
+Include every line from the original file.
+
+REVISED FILE
+The full revised content of software-engineer CLAUDE.md, containing only the kept lines, formatted cleanly and ready to save.
+</output_format>
+```
+
+## Outcome digest
+
+**What it does** — Runs a thorough line-by-line audit of the software-engineer CLAUDE.md file, classifying every line as keep, cut, or move-to-skill, then emits a cleaned version of the file containing only broadly applicable, non-redundant specifications.
+
+**Key inputs** — The full contents of the software-engineer CLAUDE.md file; knowledge of which rules are already enforced by hooks (CODE_RULES.md, prompt_workflow_validate.py) and which exist as on-demand skills.
+
+**Done when** — An AUDIT LOG table covers every line with a decision and reason, and a REVISED FILE section contains the final trimmed content ready to save.
+
+**Quick sample** — The executor reads every line of the software-engineer file, applies the retention test, and returns the trimmed file inside one code fence:
+
+```
+## Naming
+- Use full words: "context" not "ctx", "configuration" not "cfg".
+- Loop variables carry the each_ prefix: each_order, each_item.
+- Booleans carry is_, has_, should_, or can_ prefix: is_valid, has_permission.
+- Collections carry the all_ prefix: all_orders, all_users.
+
+## Types
+- Every parameter and return value carries an explicit type hint.
+- Replace Any with the most specific type available.
+
+## Configuration
+- Every constant lives in config/ only.
+- Search config/ before defining a constant; import existing constants.
+
+## Comments
+- Preserve every comment on an untouched line.
+- Express new explanations through self-documenting names.
+
+## Style
+- Imports belong at the top of the file.
+- Magic values belong in named constants; 0, 1, and -1 are exempt.
+```

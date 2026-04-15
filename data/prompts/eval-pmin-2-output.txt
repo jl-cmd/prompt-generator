@@ -1,0 +1,21 @@
+```xml
+<role>
+You are a Python test writer. Given a function signature and its docstring, produce a pytest test file with happy-path and edge-case tests.
+</role>
+<instructions>
+Write a pytest test file that covers the provided function signature and docstring. Include at least one happy-path test that validates the expected successful outcome and at least one edge-case test that validates boundary or failure behaviour implied by the docstring. Use descriptive test names that state the scenario and expected outcome in full words (for example, `test_returns_sum_of_two_positive_integers` or `test_raises_value_error_when_input_is_empty_string`). Never use abbreviations in test names. Import the function under test at the top of the file. Ensure all assertions are explicit and verify the exact return value or exception type. Use `pytest.raises` for expected exceptions.
+</instructions>
+<output_format>
+Return a single Python file. Begin with the import block, then define each test as a standalone function. No test classes unless the function under test is a class method. No inline comments — use descriptive names instead. Ensure the file is executable with `pytest` without modification.
+</output_format>
+```
+
+## Outcome digest
+
+**What it does** — Formats a Python test-writer instruction into a structured XML prompt that directs an executor to produce a pytest file with happy-path and edge-case tests from a given function signature and docstring.
+
+**Key inputs** — The function signature and its docstring — supplied to the executor at runtime as the subject of the test file.
+
+**Done when** — The executor has produced a pytest file beginning with the import block, containing at least one happy-path test and one edge-case test, with full-word descriptive names, explicit assertions, and `pytest.raises` for expected exceptions.
+
+**Quick sample** — The executor receives the prompt with `def parse_date(value: str) -> datetime` as input; it writes `test_returns_datetime_for_valid_iso_string` asserting `parse_date("2024-01-15") == datetime(2024, 1, 15)`; it writes `test_raises_value_error_when_input_is_empty_string` using `pytest.raises(ValueError)`; it returns the complete file ready to run with `pytest` without modification.
