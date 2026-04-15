@@ -70,7 +70,7 @@ The paste-ready section is the xml fence only; the digest is for reading.
 
 ## Input sanitisation
 
-The hook validation block written to the draft file must contain all required markers (`checklist_results`, `overall_status`, scope anchor tokens, context-control signals) so the validator passes. These appear only in the hook validation block, which is stripped before user output — they are absent from the user-facing fence and digest.
+The hook validation block written to the draft file must contain all required markers: `checklist_results`, `overall_status`, every deterministic checklist row token required by `REQUIRED_CHECKLIST_ROWS`, plus the scope anchor tokens and context-control signals. These appear only in the hook validation block, which is stripped before user output — they are absent from the user-facing fence and digest.
 
 If the raw input block contains any strings from `PROMPT_WORKFLOW_RESPONSE_MARKERS`, paraphrase or strip them before embedding them in the XML artifact. The user-facing fence must contain zero marker strings.
 
