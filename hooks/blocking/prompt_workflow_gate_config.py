@@ -100,6 +100,10 @@ MAXIMUM_MARKDOWN_HEADER_DEPTH: int = 6
 
 FILE_READ_ENCODING: str = "utf-8"
 
+TRIPLE_BACKTICK: str = "```"
+TILDE_FENCE_MARKER: str = "~~~"
+DIGIT_PREFIXED_SECTION_PREFIX: str = "section_"
+
 COMPILED_NEGATIVE_KEYWORD_PATTERNS: tuple[re.Pattern[str], ...] = tuple(
     re.compile(rf"\b{re.escape(keyword)}\b", re.IGNORECASE)
     for keyword in NEGATIVE_KEYWORDS_IN_ARTIFACT
