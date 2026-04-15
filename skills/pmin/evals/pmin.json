@@ -50,7 +50,7 @@
       "files": [],
       "expected_behavior": [
         "## Outcome digest uses four bullet sections (**What it does**, **Key inputs**, **Done when**, **Quick sample**) — not a markdown table",
-        "The digest format matches TARGET_OUTPUT.md §12: bullets under each of the four required headers",
+        "The digest format matches the Outcome digest section in TARGET_OUTPUT.md: bullets under each of the four required headers",
         "No part of the digest previews or replicates the output table the executor prompt would produce"
       ]
     },
