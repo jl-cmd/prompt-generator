@@ -49,7 +49,7 @@ Apply positive framing throughout:
 
 The validator treats any response containing two or more strings from `PROMPT_WORKFLOW_RESPONSE_MARKERS` as a prompt-workflow response and applies the full gate suite. Marker strings include: `target_local_roots`, `target_canonical_roots`, `target_file_globs`, `comparison_basis`, `completion_boundary`, `checklist_results`, `overall_status`, `scope anchors`.
 
-If the raw input block contains any of these marker strings, paraphrase or strip them before emitting the xml fence. The emitted fence must contain zero marker strings so the validator pass-through remains guaranteed.
+If the raw input block contains any of these marker strings, paraphrase or strip them before emitting the xml fence or Outcome digest. The full emitted output must contain zero marker strings so the validator pass-through remains guaranteed.
 
 ## Scope boundary
 

@@ -15,7 +15,7 @@ description: >-
 
 ## Flow
 
-Four steps, single pass:
+Four steps in one user-facing turn (no plan mode, no AskUserQuestion rounds, no Outcome preview gate — step 3 runs an internal validation loop until the draft is clean):
 
 1. Read the raw input block from the invocation message.
 2. Draft one xml fence with context-adapted tags, an Outcome digest, and a hook validation block.
@@ -55,7 +55,7 @@ The draft must satisfy all validator gates before emission: positive framing (ze
 
 ## Validation loop invariant
 
-The fenced XML is the immutable payload across re-runs. When a violation is inside the artifact (e.g. a negative keyword), edit only the specific flagged lines. When a violation is in the surrounding scaffolding, adjust only scaffolding. Keep the XML body byte-identical between iterations unless the stderr report names a line inside the fence.
+The fenced XML is the immutable payload across re-runs. When a violation is inside the artifact (e.g. a negative keyword), edit only the specific flagged lines. When a violation is in the surrounding scaffolding, adjust only scaffolding. Keep the XML body byte-identical between iterations; edit only lines the stderr report names as violations inside the fence.
 
 ## Outcome digest
 

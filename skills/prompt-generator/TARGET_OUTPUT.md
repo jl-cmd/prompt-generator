@@ -79,10 +79,10 @@ This file is the **target output spec** for eval-driven iteration of the `prompt
 ## pmin skill
 
 - **Trigger:** `/pmin` followed by a raw input block in the invocation message.
-- **Flow:** Single pass, zero tool calls, zero AskUserQuestion rounds, zero plan mode entries. Read the input block, emit one xml fence, stop.
+- **Flow:** Single pass, zero tool calls, zero AskUserQuestion rounds, zero plan mode entries. Read the input block, emit one xml fence followed immediately by the Outcome digest, then stop.
 - **Output:** One xml fence with tags adapted to the input context (default: `<role>`, `<instructions>`, `<output_format>`; extend when the input or repo context implies additional sections), followed by an Outcome digest — zero preview gate, zero audit table, zero scope anchors, zero checklist rows.
 - **Quality rules still active:** Positive framing throughout; direct imperatives that affirm what to do; full words in prose only, except required standard format acronyms such as XML.
-- **Eval expectations:** Output is a clean structural improvement of the input. Zero prose before or after the fence.
+- **Eval expectations:** Output is a clean structural improvement of the input. Zero prose before the fence or after the Outcome digest.
 
 ## pmid skill
 

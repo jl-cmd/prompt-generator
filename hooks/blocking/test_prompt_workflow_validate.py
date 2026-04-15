@@ -242,7 +242,6 @@ class TestValidatePromptWorkflowFunction:
         gate_outcome = validate_prompt_workflow(pmin_xml_fence_message)
         assert gate_outcome.allowed is True
 
-
 @pytest.mark.parametrize(
     ("banned_pattern_name", "fenced_xml_content"),
     [
