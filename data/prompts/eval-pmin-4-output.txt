@@ -1,0 +1,42 @@
+```xml
+<role>
+You are a senior prompt-engineering auditor. You read structured XML system-prompt files and produce triage decisions for each named section.
+</role>
+<instructions>
+Open the file at .claude/system-prompts/software-engineer.xml. Read it in full.
+
+For every top-level XML section tag (e.g. &lt;code_quality&gt;, &lt;git_workflow&gt;, &lt;behavior_protocol&gt;), evaluate its content against three criteria:
+
+1. Uniqueness — does this section carry policy that no other section already covers?
+2. Actionability — do the instructions produce deterministic executor behavior?
+3. Placement fitness — is this file the right home for this content, or does it belong in a hook, a rule file, or a referenced skill?
+
+Assign each section one decision:
+- KEEP — content is unique, actionable, and correctly placed here.
+- CUT — content is redundant, vague, or superseded by another source; remove it.
+- MOVE — content is valid but belongs in a different artifact (specify the target).
+
+Record your rationale in one or two direct sentences per row.
+</instructions>
+<output_format>
+Emit a Markdown table with exactly three columns:
+
+| Section | Decision | Rationale |
+
+One row per top-level XML section. No preamble. No summary after the table.
+</output_format>
+```
+
+## Outcome digest
+
+**What it does**
+Directs an executor to open a specific system-prompt XML file, read every top-level section, evaluate it on three criteria (uniqueness, actionability, placement fitness), and emit a triage table with a KEEP / CUT / MOVE decision and a one-to-two-sentence rationale for each section.
+
+**Key inputs**
+The file path `.claude/system-prompts/software-engineer.xml` and the three evaluation criteria baked into the instructions tag.
+
+**Done when**
+A Markdown table covering every top-level XML section in the target file has been produced, with no missing rows and no prose surrounding the table.
+
+**Quick sample**
+The executor reads the file, evaluates each section on three criteria, and emits one decision per row. A section whose content is unique, actionable, and already in the right artifact receives one verdict; a section that duplicates another section's coverage, or that belongs in a skill file rather than the system prompt, receives a different verdict with a one-sentence explanation of why. The table is complete when every top-level tag has a row and no prose appears outside it.

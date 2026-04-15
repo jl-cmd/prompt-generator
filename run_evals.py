@@ -373,14 +373,17 @@ def _call_groq_judge(output_text: str, criterion: str) -> Optional[CheckResult]:
 
     system_prompt, user_message = _build_judge_messages(criterion, output_text)
     client = _openai.OpenAI(api_key=api_key, base_url=GROQ_BASE_URL)
-    response = client.chat.completions.create(
-        model=GROQ_JUDGE_MODEL,
-        max_tokens=LLM_JUDGE_MAX_TOKENS,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_message},
-        ],
-    )
+    try:
+        response = client.chat.completions.create(
+            model=GROQ_JUDGE_MODEL,
+            max_tokens=LLM_JUDGE_MAX_TOKENS,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message},
+            ],
+        )
+    except Exception:
+        return None
     raw = response.choices[0].message.content.strip()
     parsed = json.loads(raw)
     return CheckResult(criterion, parsed["verdict"], parsed["reason"])

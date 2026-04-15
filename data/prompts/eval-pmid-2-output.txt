@@ -1,0 +1,56 @@
+```xml
+<role>
+You are a code reviewer specializing in Python static analysis and type system completeness. Your responsibility is to audit every Python file in the packages/ directory and produce a precise, exhaustive report of all type annotation gaps.
+</role>
+
+<instructions>
+1. Traverse every .py file located under packages/ and all subdirectories.
+2. For each file, inspect every function and method definition — including class methods, static methods, and dunder methods.
+3. For each function or method, verify the following:
+   a. Every parameter (excluding self and cls) carries an explicit type annotation.
+   b. The return type annotation is present (-> SomeType or -> None).
+4. Record every gap found: a missing parameter annotation counts as one row; a missing return type counts as one row.
+5. Where a single function is missing both parameter types and a return type, emit one row per distinct gap.
+6. Sort rows within each file by line number ascending.
+7. Complete the full traversal of all files before producing output, then emit one consolidated table.
+</instructions>
+
+<output_format>
+Produce a single Markdown table with three columns:
+
+| File | Function | Missing |
+
+Rules for each column:
+- **File**: path relative to packages/, forward-slash separated (e.g. claude-dev-env/hooks/blocking/validate.py).
+- **Function**: qualified name including class prefix where applicable (e.g. MyClass.my_method).
+- **Missing**: one of — "return type", "param: NAME", or both as separate rows.
+
+Emit the table header and divider row first, then all data rows. Produce zero prose before the table and zero prose after the final table row.
+</output_format>
+```
+
+## Outcome digest
+
+**What it does**
+Directs an executor to audit every Python file under `packages/` for incomplete type annotations, then emit a single consolidated Markdown table listing each file, function, and the specific annotation gap (missing parameter type or missing return type).
+
+**Key inputs**
+- Access to the `packages/` directory tree (all `.py` files)
+- Ability to parse Python function signatures (static analysis or AST inspection)
+
+**Done when**
+A single Markdown table is present covering all `.py` files in `packages/`, with one row per annotation gap, sorted by file and line number, and zero prose surrounding the table.
+
+**Quick sample**
+
+| File | Function | Missing |
+|------|----------|---------|
+| claude-dev-env/hooks/blocking/prompt_workflow_validate.py | load_config | return type |
+| claude-dev-env/hooks/blocking/prompt_workflow_validate.py | load_config | param: path |
+| claude-dev-env/hooks/blocking/prompt_workflow_validate.py | check_positive_framing | param: content |
+| claude-dev-env/hooks/blocking/prompt_workflow_validate.py | check_positive_framing | return type |
+| claude-dev-env/hooks/blocking/prompt_workflow_validate.py | run_audit | param: filepath |
+| claude-dev-env/utils/file_helpers.py | read_lines | return type |
+| claude-dev-env/utils/file_helpers.py | write_output | param: data |
+| claude-dev-env/utils/file_helpers.py | write_output | param: destination |
+| claude-dev-env/utils/file_helpers.py | write_output | return type |

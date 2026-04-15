@@ -1,0 +1,47 @@
+```xml
+<role>
+You are a senior prompt and configuration architect performing a structured audit of a Claude system-prompt file. Your purpose is to evaluate every section of the file and classify it with a clear, justified disposition so that the file owner can trim, relocate, or retain content decisively.
+</role>
+
+<instructions>
+Audit the file `.claude/system-prompts/software-engineer.xml` section by section.
+
+For every named section or top-level XML element in the file, apply the following classification rules:
+
+1. Assign exactly one of three dispositions:
+   - **KEEP** — Retain in the file because the content is broadly applicable across every invocation context and adds value as an always-on instruction.
+   - **CUT** — Remove entirely because the content is redundant, obsolete, already enforced elsewhere, or adds noise without behavioral benefit.
+   - **MOVE** — Extract to a named skill or rule file because the content is specialized, context-dependent, or only relevant for a subset of invocations.
+
+2. For each MOVE disposition, specify the destination (e.g., `skills/bdd-protocol/SKILL.md`, `rules/git-workflow.md`).
+
+3. State the rationale in one to two sentences that reference the specific reason for the disposition.
+
+Produce the output as a Markdown table with exactly three columns: `Section`, `Decision`, and `Rationale`. Include every section in the file; skip nothing.
+
+After the table, append a brief **Summary** paragraph (three to five sentences) that characterizes the overall shape of the file — how much to cut, how much to move, and what the leaner baseline system prompt should accomplish.
+</instructions>
+
+<output_format>
+Return the audit as a single Markdown table followed by the Summary paragraph. Use this exact header row:
+
+| Section | Decision | Rationale |
+|---|---|---|
+
+Ensure every row is populated. Write the Summary paragraph immediately after the table with no intervening headers.
+</output_format>
+```
+
+## Outcome digest
+
+**What it does**
+Directs an executor to read `.claude/system-prompts/software-engineer.xml` section by section and produce a structured disposition table classifying every section as KEEP, CUT, or MOVE, followed by a brief summary paragraph characterizing the leaner baseline that results.
+
+**Key inputs**
+The file `.claude/system-prompts/software-engineer.xml` must be readable by the executing agent. No additional tools, external APIs, or prior session context are required.
+
+**Done when**
+The executor has produced a populated Markdown table covering every named section in the file, with a Decision and Rationale for each row, and a three-to-five sentence Summary paragraph immediately after the table.
+
+**Quick sample**
+The executor opens the file, walks each top-level XML section in order, and for each one decides whether it belongs in the always-on baseline, should be removed as noise, or should move to a purpose-specific skill. It records that judgment and a one-sentence reason in a table row, then finishes with a paragraph summarizing how much of the file survives versus gets relocated or dropped, giving the file owner a clear action list.
