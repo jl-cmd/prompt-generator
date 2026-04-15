@@ -204,6 +204,46 @@
         "Final handoff order: Audit line, single ```xml fence, ## Outcome digest, then optional hook validation block (defined in SKILL.md Terminology) after digest",
         "extract_fenced_xml_content returns only the XML body (digest uses no second ```xml fence)"
       ]
+    },
+    {
+      "id": 15,
+      "name": "outcome_digest_required_bullets_present",
+      "scenario": "Outcome digest structural completeness",
+      "prompt": "/prompt-generator Write a system prompt for an agent that audits a repository's system prompt against its rules/ files and recommends merging redundant content",
+      "files": [],
+      "expected_behavior": [
+        "## Outcome digest section present immediately after the closing xml fence with zero intervening prose",
+        "Four required bold headers present in order: **What it does**, **Key inputs**, **Done when**, **Quick sample**",
+        "Each header is followed by at least one sentence or bullet of substantive content",
+        "No second ```xml fence anywhere inside the ## Outcome digest section (four-space indent, tilde fence, or complete triple-backtick pair when a code sample is needed)"
+      ]
+    },
+    {
+      "id": 16,
+      "name": "outcome_digest_quick_sample_is_executor_output",
+      "scenario": "Quick sample content — executor output, not prompt revision commentary",
+      "prompt": "/prompt-generator Refine my code review prompt to incorporate the missing CODE_RULES.md sections into <code_quality> and demote the rules file to an abbreviated pointer",
+      "files": [],
+      "expected_behavior": [
+        "**Quick sample** content represents approximately 20 lines of what the downstream executor would produce (structured findings, categorized recommendations, code diffs, or checklists) — not a description of edits made to the prompt XML",
+        "Quick sample contains zero instances of phrases that describe prompt authoring: 'moved into', 'extracted as', 'replaced the softer', 'N changes from the original', 'updated to match', 'now names'",
+        "Quick sample format is consistent with the output shape described in **What it does** — if the prompt produces categorized recommendations, the sample shows categorized recommendations",
+        "Digest describes what executing the prompt produces, not what prompt-generator did to the XML"
+      ]
+    },
+    {
+      "id": 17,
+      "name": "outcome_digest_no_change_log_framing",
+      "scenario": "Outcome digest framing — executor perspective, not author perspective",
+      "prompt": "/prompt-generator Update my Python code reviewer prompt: add a security-vulnerability section and add a done-when criterion that the agent reports zero critical findings",
+      "files": [],
+      "expected_behavior": [
+        "**What it does** describes what the executor running the prompt will do — not what prompt-generator changed in the XML",
+        "**Key inputs** names files, tools, or context the executor needs — not a list of sections that were added or modified",
+        "**Done when** states a checkable executor success condition — not 'prompt validated at exit 0' or 'all sections present'",
+        "No bullet in any digest section uses past-tense authoring framing: 'was added', 'has been updated', 'now includes', 'changed from'",
+        "Digest reads from the perspective of someone deciding whether to run the prompt, not someone reviewing what prompt-generator produced"
+      ]
     }
   ]
 }

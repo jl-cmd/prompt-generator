@@ -1,0 +1,61 @@
+{
+  "skill_name": "pmid",
+  "target_output_spec": "skills/prompt-generator/TARGET_OUTPUT.md",
+  "source": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#evaluation-and-iteration",
+  "evals": [
+    {
+      "id": 1,
+      "name": "pmid_formats_input_does_not_execute",
+      "scenario": "Scope boundary — format only, no task execution",
+      "prompt": "/pmid i want to do a final review of our software-engineer file. do a complete audit, thorough. make sure you read every single character and line. if you can't, deploy subagents to do it for you in sections. target: only include things that apply broadly. For domain knowledge or workflows that are only relevant sometimes, we need to use skills instead. Claude loads them on demand without bloating every conversation. Keep it concise. For each line, ask: \"Would removing this cause Claude to not follow my required specifications?\" If not, cut it.",
+      "files": [],
+      "expected_behavior": [
+        "Output is exactly one xml fence followed immediately by ## Outcome digest — zero prose before the fence, zero prose after the digest",
+        "The xml fence contains a structured XML prompt wrapping the user's audit request — not the result of performing the audit",
+        "Only prompt-validation workflow operations are allowed: writing data/prompts/.draft-prompt.xml and running the validator CLI; no repo file reads, no Glob, no Zoekt searches, and no subagent spawns",
+        "The assistant produces no audit output (tables, line-by-line findings, executive summaries, priority action lists) before, inside, or after the xml fence",
+        "The assistant does not self-correct mid-turn with phrases like 'You're right — you asked for a prompt, not for me to execute the audit myself' — the scope boundary is respected from the first token",
+        "## Outcome digest contains all four required bullets: **What it does**, **Key inputs**, **Done when**, **Quick sample**",
+        "**Quick sample** shows approximately 20 lines of what an executor running the formatted prompt would produce — not a description of what pmid changed in the XML"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "pmid_outcome_digest_four_bullets",
+      "scenario": "Outcome digest structural completeness",
+      "prompt": "/pmid You are a code reviewer. Review all Python files in packages/ for type hint completeness. For each file, list functions missing return types or parameter types. Output a markdown table: File | Function | Missing.",
+      "files": [],
+      "expected_behavior": [
+        "## Outcome digest present immediately after the closing xml fence with zero intervening prose",
+        "Four required bold headers present in order: **What it does**, **Key inputs**, **Done when**, **Quick sample**",
+        "Each header is followed by at least one sentence or bullet of substantive content",
+        "No second ```xml fence anywhere inside the ## Outcome digest section"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "pmid_outcome_digest_not_a_table",
+      "scenario": "Outcome digest format — bullets, not markdown table",
+      "prompt": "/pmid Audit .claude/system-prompts/software-engineer.xml line by line. For each section, decide: KEEP (broadly applicable), CUT (remove), or MOVE (to a named skill). Output a table: Section | Decision | Rationale.",
+      "files": [],
+      "expected_behavior": [
+        "## Outcome digest uses four bullet sections (**What it does**, **Key inputs**, **Done when**, **Quick sample**) — not a markdown table with Area | Verdict or Section | Decision columns",
+        "Each of the four required headers contains bullet content beneath it",
+        "No part of the digest replicates or previews the audit table the executor prompt would produce"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "pmid_validation_loop_runs",
+      "scenario": "File-based validation loop — pmid runs validator before emitting",
+      "prompt": "/pmid Review packages/samsung-automation/ for hardcoded selectors. Output a JSON array: [{file, line, selector, suggested_constant_name}].",
+      "files": [],
+      "expected_behavior": [
+        "pmid writes the complete draft output (xml fence + ## Outcome digest + hook validation block) to data/prompts/.draft-prompt.xml",
+        "prompt_workflow_validate.py runs against the draft; violations at exit 2 are fixed and re-validated until exit 0",
+        "Hook validation block is stripped before user-facing output",
+        "User-facing output is exactly the validated xml fence followed by ## Outcome digest — no validation metadata visible"
+      ]
+    }
+  ]
+}
