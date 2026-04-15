@@ -19,7 +19,7 @@ Four steps in one user-facing turn (no plan mode, no AskUserQuestion rounds, no 
 
 1. Read the raw input block from the invocation message.
 2. Draft one xml fence with context-adapted tags, an Outcome digest, and a hook validation block.
-3. Write the complete draft to `data/prompts/.draft-prompt.xml`. Run `python hooks/blocking/prompt_workflow_validate.py data/prompts/.draft-prompt.xml`. On exit 2, read stderr violations, fix the specific flagged lines in the file, and re-run until exit 0.
+3. Write the complete draft to `data/prompts/.draft-prompt.xml`. Run `python packages/claude-dev-env/hooks/blocking/prompt_workflow_validate.py data/prompts/.draft-prompt.xml`. On exit 2, read stderr violations, fix the specific flagged lines in the file, and re-run until exit 0.
 4. Strip the hook validation block. Emit the validated fence followed by the Outcome digest. Delete `data/prompts/.draft-prompt.xml`.
 
 Zero tool calls beyond the validator CLI. Zero AskUserQuestion rounds. Zero plan mode entries.
@@ -39,7 +39,7 @@ Start from this structure and adapt it using all available context:
 - **Session context** — prior conversation turns that clarify intent, audience, or constraints fold directly into tag content; incorporate what is already known
 - **User specifics** — any explicit framing, target agent, or format the user stated in the `/pmid` invocation is the authoritative input; use it as the primary shaping signal
 
-Every tag used must be opened and closed. Emit the fence first, then the Outcome digest immediately after — the fence characters only, with zero other surrounding prose.
+Every tag used must be opened and closed. On the final user-facing turn, emit the fence first, then the Outcome digest immediately after — the fence characters only, with zero other surrounding prose. The draft file used for validation may still include the hook validation block until step 4 strips it.
 
 ## Quality rules
 
@@ -55,7 +55,7 @@ The draft must satisfy all validator gates before emission: positive framing (ze
 
 ## Validation loop invariant
 
-The fenced XML is the immutable payload across re-runs. When a violation is inside the artifact (e.g. a negative keyword), edit only the specific flagged lines. When a violation is in the surrounding scaffolding, adjust only scaffolding. Keep the XML body byte-identical between iterations; edit only lines the stderr report names as violations inside the fence.
+The fenced XML is the structurally stable payload across re-runs. When a violation is inside the artifact (e.g. a negative keyword), edit only the minimal specific flagged lines. When a violation is in the surrounding scaffolding, adjust only scaffolding. Keep section order and boundaries stable between iterations; change only lines the stderr report names as violations inside the fence.
 
 ## Outcome digest
 
