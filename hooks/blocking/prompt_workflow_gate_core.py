@@ -12,15 +12,16 @@ from prompt_workflow_gate_config import (
     COMPILED_NEGATIVE_INDIRECT_PATTERNS,
     COMPILED_NEGATIVE_KEYWORD_PATTERNS,
     DEBUG_INTENT_MARKERS,
+    DIGIT_PREFIXED_SECTION_PREFIX,
     INTERNAL_OBJECT_MARKERS,
     MAXIMUM_MARKDOWN_HEADER_DEPTH,
     PROMPT_WORKFLOW_RESPONSE_MARKERS,
     REQUIRED_CHECKLIST_ROWS,
     REQUIRED_SCOPE_ANCHORS,
     REQUIRED_XML_SECTIONS,
+    TILDE_FENCE_MARKER,
+    TRIPLE_BACKTICK,
 )
-
-TRIPLE_BACKTICK = "```"
 AUDIT_LINE_PATTERN = re.compile(r"^\s*[●•]?\s*(Audit:\s*.+?)\s*$")
 
 def _line_opens_xml_fence(line: str) -> bool:
@@ -188,7 +189,10 @@ def _normalize_header_to_tag_name(header_text: str) -> str:
     replaced = lowered.replace(" ", "_")
     cleaned = re.sub(r"[^a-z0-9_]", "", replaced)
     collapsed = re.sub(r"_{2,}", "_", cleaned)
-    return collapsed.strip("_")
+    normalized_tag_name = collapsed.strip("_")
+    if normalized_tag_name and normalized_tag_name[0].isdigit():
+        normalized_tag_name = DIGIT_PREFIXED_SECTION_PREFIX + normalized_tag_name
+    return normalized_tag_name
 
 
 def extract_plan_section_headers(
@@ -198,8 +202,14 @@ def extract_plan_section_headers(
         rf"^(#{{1,{MAXIMUM_MARKDOWN_HEADER_DEPTH}}})\s+(.+)$",
     )
     headers: list[tuple[int, str]] = []
+    is_inside_fenced_block = False
     for each_line in plan_markdown.splitlines():
-        match = header_pattern.match(each_line.strip())
+        if each_line.startswith(TRIPLE_BACKTICK) or each_line.startswith(TILDE_FENCE_MARKER):
+            is_inside_fenced_block = not is_inside_fenced_block
+            continue
+        if is_inside_fenced_block:
+            continue
+        match = header_pattern.match(each_line)
         if match:
             depth = len(match.group(1))
             tag_name = _normalize_header_to_tag_name(match.group(2))
