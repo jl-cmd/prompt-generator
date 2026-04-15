@@ -19,7 +19,7 @@ Four steps in one user-facing turn (no plan mode, no AskUserQuestion rounds, no 
 
 1. Read the raw input block from the invocation message.
 2. Draft one xml fence with context-adapted tags, an Outcome digest, and a hook validation block.
-3. Write the complete draft to `data/prompts/.draft-prompt.xml`. Run `python packages/claude-dev-env/hooks/blocking/prompt_workflow_validate.py data/prompts/.draft-prompt.xml`. On exit 2, read stderr violations, fix the specific flagged lines in the file, and re-run until exit 0.
+3. Write the complete draft to `data/prompts/.draft-prompt.xml`. Run `python packages/claude-dev-env/hooks/blocking/prompt_workflow_validate.py data/prompts/.draft-prompt.xml`. On exit 2, read stderr violations, fix the specific violations indicated by stderr (edit the flagged lines when stderr provides line numbers; fix the relevant section when it names a structural violation), and re-run until exit 0.
 4. Strip the hook validation block. Emit the validated fence followed by the Outcome digest. Delete `data/prompts/.draft-prompt.xml`.
 
 Zero tool calls beyond the validator CLI. Zero AskUserQuestion rounds. Zero plan mode entries.

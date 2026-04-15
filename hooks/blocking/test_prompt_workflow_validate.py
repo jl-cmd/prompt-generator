@@ -231,7 +231,7 @@ class TestValidatePromptWorkflowFunction:
         validation_result = validate_prompt_workflow(message)
         assert validation_result.allowed is True
 
-    def test_minimal_pmin_xml_response_passes_validator(self) -> None:
+    def test_minimal_pmin_xml_fence_allowed_as_non_workflow_message(self) -> None:
         pmin_xml_fence_message = (
             "```xml\n"
             "<role>Format the raw input block as clean XML.</role>\n"
