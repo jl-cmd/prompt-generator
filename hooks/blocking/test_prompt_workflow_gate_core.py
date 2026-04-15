@@ -257,7 +257,6 @@ def test_extract_fenced_xml_content_from_export_supports_flattened_transcript() 
     assert "<output_format>O</output_format>" in extracted
     assert "Worked for" not in extracted
 
-
 def test_extract_plan_section_headers_ignores_headers_inside_backtick_fence() -> None:
     plan = "# real\n```python\n# not a header\n```\n## also_real\n"
     headers = extract_plan_section_headers(plan)
@@ -266,7 +265,6 @@ def test_extract_plan_section_headers_ignores_headers_inside_backtick_fence() ->
     assert "also_real" in tag_names
     assert "not_a_header" not in tag_names
 
-
 def test_extract_plan_section_headers_ignores_headers_inside_tilde_fence() -> None:
     plan = "# outside\n~~~\n# inside_fence\n~~~\n"
     headers = extract_plan_section_headers(plan)
@@ -274,14 +272,12 @@ def test_extract_plan_section_headers_ignores_headers_inside_tilde_fence() -> No
     assert "outside" in tag_names
     assert "inside_fence" not in tag_names
 
-
 def test_extract_plan_section_headers_ignores_indented_headers() -> None:
     plan = "# real_header\n  # indented_not_a_header\n"
     headers = extract_plan_section_headers(plan)
     tag_names = [name for _depth, name in headers]
     assert "real_header" in tag_names
     assert "indented_not_a_header" not in tag_names
-
 
 def test_normalize_header_to_tag_name_prefixes_digit_leading_names() -> None:
     plan = "## 0. Initialize context\n# 1 setup\n"
