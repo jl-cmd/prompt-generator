@@ -1,6 +1,6 @@
 {
     "name": "@jl-cmd/prompt-generator",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "description": "Standalone prompt-generator and agent-prompt skills for Claude Code",
     "type": "module",
     "bin": {
@@ -10,6 +10,8 @@
         "bin/",
         "skills/prompt-generator/",
         "skills/agent-prompt/",
+        "skills/pmid/",
+        "skills/pmin/",
         "hooks/blocking/prompt_workflow_gate_config.py",
         "hooks/blocking/prompt_workflow_gate_core.py",
         "hooks/blocking/prompt_workflow_validate.py",
