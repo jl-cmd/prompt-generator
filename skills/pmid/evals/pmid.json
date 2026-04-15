@@ -40,7 +40,7 @@
       "files": [],
       "expected_behavior": [
         "## Outcome digest uses four bullet sections (**What it does**, **Key inputs**, **Done when**, **Quick sample**) — not a markdown table with Area | Verdict or Section | Decision columns",
-        "The digest format matches TARGET_OUTPUT.md §12: bullets under each of the four required headers",
+        "Each of the four required headers contains bullet content beneath it",
         "No part of the digest replicates or previews the audit table the executor prompt would produce"
       ]
     },
