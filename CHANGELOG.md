@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.0](https://github.com/jl-cmd/prompt-generator/compare/v1.5.1...v1.6.0) (2026-04-16)
+
+
+### Features
+
+* **pmin:** add eval 8 for compound investigate+implement scope boundary ([#31](https://github.com/jl-cmd/prompt-generator/issues/31)) ([c9593e0](https://github.com/jl-cmd/prompt-generator/commit/c9593e028ed424e0af8705215b3f9d393a4cab9f))
+* **pmin:** add nested-backtick fence safety rule and eval ([#25](https://github.com/jl-cmd/prompt-generator/issues/25)) ([8ef66f1](https://github.com/jl-cmd/prompt-generator/commit/8ef66f167f7c033b7bd07982584913d61cdf385d))
+
 ## [1.5.1](https://github.com/jl-cmd/prompt-generator/compare/v1.5.0...v1.5.1) (2026-04-16)
 
 
