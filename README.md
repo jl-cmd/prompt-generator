@@ -56,6 +56,17 @@ Mid-tier XML formatter — takes a raw input block, drafts context-adapted XML, 
 
 Use `/pmin` for a quick single-pass format; use `/pmid` when validation is needed without the full interactive flow; use `/prompt-generator` for the full guided authoring experience.
 
+#### Example — removing a scheduled task and blocking future recreation
+
+A task that is specific enough to guide execution but contains no personal data is a natural fit for `/pmin`:
+
+```
+/pmin i need to modify or delete the task, and block any future creations
+of similar tasks from uipath
+```
+
+`/pmin` infers the platform (Windows Task Scheduler), emits a structured XML prompt with `<role>`, `<instructions>`, and `<output_format>` tags, and produces a step-by-step runbook covering task discovery, deletion, verification, and layered blocking (AppLocker, icacls, executable renaming, service disable). The Outcome digest tells you exactly what commands to run and what success looks like — no PII required, no session context carried over.
+
 ## Hooks and rules
 
 - **`hooks/blocking/`** — Shared validator and gate helpers (for example `prompt_workflow_validate.py`, `prompt_workflow_gate_core.py`, `prompt_workflow_gate_config.py`, `prompt_workflow_clipboard.py`). Spec: `hooks/HOOK_SPECS_PROMPT_WORKFLOW.md`.
