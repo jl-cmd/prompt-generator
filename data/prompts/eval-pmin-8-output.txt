@@ -66,15 +66,15 @@ The executor returns an auth flow summary and a list of changes made, ending wit
 
 **Quick sample**
 **Auth flow summary**
-- Login endpoint: POST /api/auth/login — src/auth/auth.controller.ts:42
-- Handler: AuthController.login → AuthService.validateUser → bcrypt.compare
-- Existing middleware: JwtAuthGuard (applied globally), ValidationPipe
-- Existing rate limiting: none
+- Login endpoint: [HTTP_METHOD] [LOGIN_ENDPOINT] — [ROUTE_FILE]:[LINE_NUMBER]
+- Handler: [CONTROLLER_OR_HANDLER] → [AUTH_CHECK_COMPONENT] → [CREDENTIAL_VALIDATION_STEP]
+- Existing middleware: [MIDDLEWARE_LIST_OR_NONE]
+- Existing rate limiting: [RATE_LIMIT_LIBRARY_AND_CONFIGURATION_OR_NONE]
 
 **Changes made**
-- src/auth/auth.module.ts: registered ThrottlerModule with ttl=900, limit=5
-- src/auth/auth.controller.ts:38: added @Throttle(5, 900) decorator to login handler
-- src/auth/auth.service.ts:61: added per-account attempt counter using Redis INCR/EXPIRE
-- test/auth.e2e-spec.ts: added four rate-limit test cases (IP limit, account limit, reset on success)
+- [FILE_PATH_1]: [ONE_LINE_CHANGE_DESCRIPTION_1]
+- [FILE_PATH_2]: [ONE_LINE_CHANGE_DESCRIPTION_2]
+- [FILE_PATH_3]: [ONE_LINE_CHANGE_DESCRIPTION_3]
+- [TEST_FILE_PATH]: [TEST_CHANGE_DESCRIPTION]
 
-Rate-limit checks active on POST /api/auth/login.
+Rate-limit checks active on [LOGIN_ENDPOINT].
