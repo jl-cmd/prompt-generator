@@ -305,6 +305,54 @@ def check_digest_not_a_table(text: str) -> CheckResult:
     )
 
 
+def check_no_nested_backtick_fences_in_xml(text: str) -> CheckResult:
+    """No triple-backtick code fences appear inside the xml fence content."""
+    criterion = "No triple-backtick code fences inside the xml fence"
+    lines = text.splitlines()
+
+    open_index: int | None = None
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith("```xml") or stripped.startswith("``` xml"):
+            open_index = index
+            break
+
+    if open_index is None:
+        return CheckResult(criterion, "SKIP", "No xml fence found — checked by another criterion")
+
+    digest_index: int | None = None
+    for index, line in enumerate(lines):
+        if line.strip().startswith("## Outcome digest"):
+            digest_index = index
+            break
+
+    if digest_index is None:
+        return CheckResult(criterion, "SKIP", "No Outcome digest found — checked by another criterion")
+
+    close_index: int | None = None
+    for index in range(digest_index - 1, open_index, -1):
+        if re.match(r"^```\s*$", lines[index].strip()):
+            close_index = index
+            break
+
+    if close_index is None:
+        return CheckResult(criterion, "FAIL", "No closing fence found before Outcome digest")
+
+    nested_line_numbers = [
+        index + 1
+        for index in range(open_index + 1, close_index)
+        if re.match(r"^`{3,}", lines[index].strip())
+    ]
+    if nested_line_numbers:
+        return CheckResult(
+            criterion,
+            "FAIL",
+            f"Found nested backtick fence(s) at line(s) {nested_line_numbers} inside the xml fence",
+        )
+
+    return CheckResult(criterion, "PASS", "No nested backtick fences inside the xml fence")
+
+
 def check_quick_sample_no_authoring_phrases(text: str) -> CheckResult:
     """Quick sample contains zero prompt-authoring phrases."""
     criterion = "Quick sample contains zero prompt-authoring phrases"
@@ -340,6 +388,7 @@ def run_structural_checks(output_text: str) -> list[CheckResult]:
         check_four_required_digest_headers(output_text),
         check_each_header_has_content(output_text),
         check_no_second_xml_fence_in_digest(output_text),
+        check_no_nested_backtick_fences_in_xml(output_text),
         check_zero_prose_after_digest(output_text),
         check_digest_not_a_table(output_text),
         check_quick_sample_no_authoring_phrases(output_text),

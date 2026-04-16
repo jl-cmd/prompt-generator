@@ -72,6 +72,8 @@ DETERMINISTIC_COVERED_PATTERNS: list[str] = [
     "bullets under each of the four required headers",
     # perspective/tone check — four-section format with correct content is the structural proxy
     "from the perspective of someone deciding",
+    # nested-fence check — covered by check_no_nested_backtick_fences_in_xml
+    "no triple-backtick code fences inside the xml fence",
 ]
 
 LLM_JUDGE_SYSTEM_PROMPT: str = """\

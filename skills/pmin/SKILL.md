@@ -45,6 +45,12 @@ Apply positive framing throughout:
 - Write full words in general prose; allow established technical format acronyms required by this skill, such as XML.
 - Replace hedging phrases ("let me also check", "actually", "I think", "might be", "possibly") with direct assertions.
 
+## Fence safety
+
+Never place triple-backtick code blocks inside the xml fence. A closing ` ``` ` inside the outer xml fence terminates it prematurely, breaking the rendered output.
+
+When the raw input contains code blocks, represent the code as 4-space indented text inside the XML instead. Remove all backtick fencing — language-tagged or plain — from inside the xml fence content.
+
 ## Outcome digest
 
 Emit `## Outcome digest` immediately after the closing fence:
