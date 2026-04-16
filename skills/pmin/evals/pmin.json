@@ -24,7 +24,7 @@
       "prompt": "/pmin You are a Python test writer. Given a function signature and its docstring, produce a pytest test file with happy-path and one edge-case test. Use descriptive test names.",
       "files": [],
       "expected_behavior": [
-        "No tool calls of any kind: no Read, Glob, Grep, Zoekt, AskUserQuestion, EnterPlanName, ExitPlanMode, Agent, or Task",
+        "No tool calls of any kind: no Read, Glob, Grep, Zoekt, AskUserQuestion, EnterPlanMode, ExitPlanMode, Agent, or Task",
         "No Outcome preview gate turn before the final handoff",
         "Output is one xml fence followed immediately by ## Outcome digest — complete in a single turn"
       ]
