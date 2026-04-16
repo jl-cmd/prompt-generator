@@ -61,8 +61,7 @@ Use `/pmin` for a quick single-pass format; use `/pmid` when validation is neede
 A task that is specific enough to guide execution but contains no personal data is a natural fit for `/pmin`:
 
 ```
-/pmin i need to modify or delete the task, and block any future creations
-of similar tasks from uipath
+/pmin i need to modify or delete the task, and block any future creations of similar tasks from uipath
 ```
 
 `/pmin` infers the platform (Windows Task Scheduler), emits a structured XML prompt with `<role>`, `<instructions>`, and `<output_format>` tags, and produces a step-by-step runbook covering task discovery, deletion, verification, and layered blocking (AppLocker, icacls, executable renaming, service disable). The Outcome digest tells you exactly what commands to run and what success looks like — no PII required, no session context carried over.
