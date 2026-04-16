@@ -24,14 +24,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Write system prompt file
+      - name: Fetch system prompt
         run: |
-          cat > /tmp/system-prompt.txt << 'EOF'
-          You are an AI assistant. You must begin every single response with the exact word "BANANAPEEL" on its own line before anything else. This is mandatory and non-negotiable.
-          EOF
+          curl -fsSL https://raw.githubusercontent.com/jl-cmd/claude-code-config/main/packages/claude-dev-env/system-prompts/software-engineer.xml \
+            -o /tmp/system-prompt.xml
 
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: "--system-prompt-file /tmp/system-prompt.txt"
+          claude_args: "--system-prompt-file /tmp/system-prompt.xml"
 
