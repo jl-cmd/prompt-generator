@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.1](https://github.com/jl-cmd/prompt-generator/compare/v1.5.0...v1.5.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* add actions/checkout@v4 before claude-code-action ([4b16bce](https://github.com/jl-cmd/prompt-generator/commit/4b16bce3efc1109af153219deebe44d2d6bd49d9))
+* switch to claude_code_oauth_token for Claude Max ([e3285d9](https://github.com/jl-cmd/prompt-generator/commit/e3285d9f76c06ba3a8db1ab7e2f02b39b978df2d))
+
 ## [1.5.0](https://github.com/jl-cmd/prompt-generator/compare/v1.4.0...v1.5.0) (2026-04-15)
 
 
