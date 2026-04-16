@@ -77,6 +77,15 @@ class EvalResult:
 
 
 # ---------------------------------------------------------------------------
+# Fence / heading markers used by structural checks
+# ---------------------------------------------------------------------------
+
+_XML_FENCE_OPEN_PREFIXES: tuple[str, ...] = ("```xml", "``` xml")
+_XML_FENCE_CLOSE: str = "```"
+_OUTCOME_DIGEST_HEADING: str = "## Outcome digest"
+_NESTED_BACKTICK_PATTERN: re.Pattern[str] = re.compile(r"^`{3,}")
+
+# ---------------------------------------------------------------------------
 # Structural (deterministic) checks
 # ---------------------------------------------------------------------------
 
@@ -308,40 +317,40 @@ def check_digest_not_a_table(text: str) -> CheckResult:
 def check_no_nested_backtick_fences_in_xml(text: str) -> CheckResult:
     """No triple-backtick code fences appear inside the xml fence content."""
     criterion = "No triple-backtick code fences inside the xml fence"
-    lines = text.splitlines()
+    all_lines = text.splitlines()
 
     open_index: int | None = None
-    for index, line in enumerate(lines):
-        stripped = line.strip()
-        if stripped.startswith("```xml") or stripped.startswith("``` xml"):
-            open_index = index
+    for each_line_index, each_line in enumerate(all_lines):
+        stripped = each_line.strip()
+        if any(stripped.startswith(p) for p in _XML_FENCE_OPEN_PREFIXES):
+            open_index = each_line_index
             break
 
     if open_index is None:
         return CheckResult(criterion, "SKIP", "No xml fence found — checked by another criterion")
 
     digest_index: int | None = None
-    for index, line in enumerate(lines):
-        if line.strip().startswith("## Outcome digest"):
-            digest_index = index
+    for each_line_index, each_line in enumerate(all_lines):
+        if each_line.strip().startswith(_OUTCOME_DIGEST_HEADING):
+            digest_index = each_line_index
             break
 
     if digest_index is None:
         return CheckResult(criterion, "SKIP", "No Outcome digest found — checked by another criterion")
 
     close_index: int | None = None
-    for index in range(digest_index - 1, open_index, -1):
-        if re.match(r"^```\s*$", lines[index].strip()):
-            close_index = index
+    for each_line_index in range(digest_index - 1, open_index, -1):
+        if all_lines[each_line_index].strip() == _XML_FENCE_CLOSE:
+            close_index = each_line_index
             break
 
     if close_index is None:
         return CheckResult(criterion, "FAIL", "No closing fence found before Outcome digest")
 
     nested_line_numbers = [
-        index + 1
-        for index in range(open_index + 1, close_index)
-        if re.match(r"^`{3,}", lines[index].strip())
+        each_line_index + 1
+        for each_line_index in range(open_index + 1, close_index)
+        if _NESTED_BACKTICK_PATTERN.match(all_lines[each_line_index].strip())
     ]
     if nested_line_numbers:
         return CheckResult(
