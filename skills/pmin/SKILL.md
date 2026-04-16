@@ -47,7 +47,7 @@ Apply positive framing throughout:
 
 ## Fence safety
 
-Never place triple-backtick code blocks inside the xml fence. A closing ` ``` ` inside the outer xml fence terminates it prematurely, breaking the rendered output.
+Never place triple-backtick code blocks inside the xml fence. A closing `` ``` `` inside the outer xml fence terminates it prematurely, breaking the rendered output.
 
 When the raw input contains code blocks, represent the code as 4-space indented text inside the XML instead. Remove all backtick fencing — language-tagged or plain — from inside the xml fence content.
 
@@ -58,7 +58,7 @@ Emit `## Outcome digest` immediately after the closing fence:
 - **What it does** — plain-language summary of what running this prompt produces
 - **Key inputs** — what the prompt needs to work (files, tools, context)
 - **Done when** — how to tell the prompt succeeded
-- **Quick sample** — short example of what the output looks like (about twenty lines max). Write raw executor output — not a description of the prompt's behavior. Any code blocks inside the Quick sample must use plain triple backticks with no language tag (never ` ```xml ` or any other tagged fence) so the structural checker does not detect a second xml fence. Do not use authoring phrases ("moved into", "extracted as", "replaced the softer", "changes from the original", "updated to match", "now names", "was added", "has been updated", "now includes", "changed from") — write the sample as actual executor output, not commentary on what changed.
+- **Quick sample** — short example of what the output looks like (about twenty lines max). Write raw executor output — not a description of the prompt's behavior. Any code blocks inside the Quick sample must use plain triple backticks with no language tag (never `` ```xml `` or any other tagged fence) so the structural checker does not detect a second xml fence. Do not use authoring phrases ("moved into", "extracted as", "replaced the softer", "changes from the original", "updated to match", "now names", "was added", "has been updated", "now includes", "changed from") — write the sample as actual executor output, not commentary on what changed.
 
 ## Input sanitisation
 

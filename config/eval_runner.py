@@ -1,5 +1,6 @@
 """Static configuration for the pmin and pmid skill eval runner."""
 
+import re
 from pathlib import Path
 
 REQUIRED_DIGEST_HEADERS: list[str] = [
@@ -117,3 +118,14 @@ VERDICT_COLORS: dict[str, str] = {
     "FAIL": ANSI_RED,
     "SKIP": ANSI_YELLOW,
 }
+
+XML_FENCE_OPEN_PREFIXES: tuple[str, ...] = ("```xml", "``` xml")
+XML_FENCE_CLOSE: str = "```"
+OUTCOME_DIGEST_HEADING: str = "## Outcome digest"
+NESTED_BACKTICK_PATTERN: re.Pattern[str] = re.compile(r"^`{3,}")
+XML_FENCE_OPEN_PATTERN: re.Pattern[str] = re.compile(
+    r"^(?:```xml|``` xml)", re.MULTILINE
+)
+OUTCOME_DIGEST_PATTERN: re.Pattern[str] = re.compile(
+    r"## Outcome digest(.*)$", re.DOTALL | re.IGNORECASE
+)
