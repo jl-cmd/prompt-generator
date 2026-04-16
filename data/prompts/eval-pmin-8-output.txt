@@ -1,0 +1,80 @@
+```xml
+<role>
+You are a senior backend security engineer. You are investigating an existing authentication flow and hardening it against brute-force and credential-stuffing attacks by adding rate-limit checks to the login endpoint.
+</role>
+
+<instructions>
+Phase 1 — Investigate the auth flow
+
+1. Locate the login endpoint. Search for route definitions that handle POST requests to paths containing "login", "auth", or "signin". Note the file, handler function, and any middleware chain applied.
+
+2. Trace the handler. Read the handler function in full. Identify:
+   - How credentials are received and validated
+   - Which service or model performs the credential check
+   - What is returned on success vs. failure (token type, response shape)
+   - Any existing middleware (auth guards, throttlers, validators)
+
+3. Check for existing rate limiting. Search for any throttle, rate-limit, or IP-block middleware already in the project. Note the library used (e.g. express-rate-limit, nestjs/throttler, django-ratelimit) and its current configuration if any.
+
+Phase 2 — Implement rate-limit checks
+
+4. Add per-IP rate limiting to the login endpoint using the pattern already established in the codebase. If none exists, install and configure the appropriate library for the framework in use.
+
+   Apply the following limits as a starting point (adjust to match project conventions):
+   - 5 failed attempts per IP per 15-minute window
+   - Lockout response: HTTP 429 with Retry-After header
+
+5. Add per-account rate limiting (by username/email) to prevent distributed attacks that rotate source IPs:
+   - 10 failed attempts per account identifier per 15-minute window
+   - Same 429 + Retry-After response
+
+6. Ensure successful logins reset the per-account counter for that identifier.
+
+7. Write or update tests covering:
+   - A request within the allowed window succeeds
+   - A request that exceeds the IP limit returns 429
+   - A request that exceeds the account limit returns 429
+   - A successful login after previous failures resets the counter
+</instructions>
+
+<output_format>
+Report findings and actions in two sections:
+
+**Auth flow summary**
+- Login endpoint path and file location
+- Handler function name and credential-check mechanism
+- Existing middleware (list each; note "none" if absent)
+- Existing rate limiting (library, config, or "none")
+
+**Changes made**
+For each change: the file modified, a one-line description of the change, and the key lines added or modified (inline code block, no full file reprints).
+
+End with a confirmation line: "Rate-limit checks active on [endpoint path]."
+</output_format>
+```
+
+## Outcome digest
+
+**What it does**
+Formats a two-phase compound task — codebase investigation followed by rate-limit implementation — into a structured XML prompt that a downstream executor can run without further clarification.
+
+**Key inputs**
+The codebase under investigation (executor reads it at runtime); no file paths, credentials, or session context are required upfront.
+
+**Done when**
+The executor returns an auth flow summary and a list of changes made, ending with a confirmation line that rate-limit checks are active on the login endpoint.
+
+**Quick sample**
+**Auth flow summary**
+- Login endpoint: [HTTP_METHOD] [LOGIN_ENDPOINT] — [ROUTE_FILE]:[LINE_NUMBER]
+- Handler: [CONTROLLER_OR_HANDLER] → [AUTH_CHECK_COMPONENT] → [CREDENTIAL_VALIDATION_STEP]
+- Existing middleware: [MIDDLEWARE_LIST_OR_NONE]
+- Existing rate limiting: [RATE_LIMIT_LIBRARY_AND_CONFIGURATION_OR_NONE]
+
+**Changes made**
+- [FILE_PATH_1]: [ONE_LINE_CHANGE_DESCRIPTION_1]
+- [FILE_PATH_2]: [ONE_LINE_CHANGE_DESCRIPTION_2]
+- [FILE_PATH_3]: [ONE_LINE_CHANGE_DESCRIPTION_3]
+- [TEST_FILE_PATH]: [TEST_CHANGE_DESCRIPTION]
+
+Rate-limit checks active on [LOGIN_ENDPOINT].
