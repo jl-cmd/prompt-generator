@@ -58,13 +58,83 @@ Use `/pmin` for a quick single-pass format; use `/pmid` when validation is neede
 
 #### Example — removing a scheduled task and blocking future recreation
 
-A task that is specific enough to guide execution but contains no personal data is a natural fit for `/pmin`:
-
 ```
 /pmin i need to modify or delete the task, and block any future creations of similar tasks from uipath
 ```
 
-`/pmin` infers the platform (Windows Task Scheduler) and emits a structured XML prompt with `<role>`, `<instructions>`, and `<output_format>` tags that instruct a downstream agent to generate a step-by-step runbook covering task discovery, deletion, verification, and layered blocking (AppLocker, icacls, executable renaming, service disable). The Outcome digest summarizes the intended scope and verification criteria for that generated runbook — no PII required, no session context carried over.
+`/pmin` infers the platform (Windows Task Scheduler) and emits a structured XML prompt with `<role>`, `<instructions>`, and `<output_format>` tags that instruct a downstream agent to generate a step-by-step runbook covering task discovery, deletion, verification, and layered blocking (AppLocker, executable renaming, service disable). The Outcome digest summarizes the intended scope and verification criteria for that generated runbook — no PII required, no session context carried over.
+
+Illustrative XML portion of the output (the Outcome digest is omitted here for brevity; task name and SID are discovered at runtime via `schtasks /query`):
+
+```xml
+<role>
+You are a Windows system administrator with expertise in Task Scheduler, registry policy, and software restriction. You are helping the user remove a UiPath-created scheduled task and prevent UiPath from recreating it.
+</role>
+
+<instructions>
+1. Identify the exact task to remove. Run the following to find UiPath tasks and note the full task name:
+
+    schtasks /query /fo LIST /v | findstr /i "uipath"
+
+   Use the exact TaskName returned (e.g. "UiPath Connected Updater App-S-1-5-21-{{USER_SID}}") in subsequent steps.
+
+2. Delete the task using one of two methods:
+
+   Method A — schtasks (may not require elevation for some per-user tasks):
+
+    schtasks /delete /tn "{{TASK_NAME}}" /f
+
+   Method B — Task Scheduler GUI: open taskschd.msc, locate the task, right-click, Delete.
+
+3. Verify deletion:
+
+    schtasks /query /tn "{{TASK_NAME}}"
+
+   Expect an error indicating the task cannot be found — that confirms removal.
+
+4. Block future task creation by UiPath. Apply one or more of these targeted layers:
+
+   Layer 1 — AppLocker or Software Restriction Policy. Create a rule that blocks UiPath.Connected.Updater.App.exe from running at all, which prevents it from registering tasks:
+
+    - Open secpol.msc → Application Control Policies → AppLocker → Executable Rules
+    - Add a Deny rule for path: %LOCALAPPDATA%\Programs\UiPathPlatform\Updater\*.exe
+    - Apply to "Everyone" or your user account.
+
+   Layer 2 — Rename or remove the executable so the task cannot fire even if recreated:
+
+    ren "%LOCALAPPDATA%\Programs\UiPathPlatform\Updater\UiPath.Connected.Updater.App.exe" UiPath.Connected.Updater.App.exe.disabled
+
+   Layer 3 — Block the UiPath update service if one is registered:
+
+    sc query | findstr /i uipath
+    sc stop  UiPathUpdaterService
+    sc config UiPathUpdaterService start= disabled
+
+5. Confirm no residual UiPath tasks remain:
+
+    schtasks /query /fo LIST | findstr /i "uipath"
+
+   Expect: no output.
+</instructions>
+
+<output_format>
+For each step, emit:
+- The exact command run
+- The raw terminal output (or "no output" if silent)
+- A one-line status verdict: DONE / FAILED / SKIPPED (with reason)
+
+End with a summary table:
+
+    Step | Action                  | Status
+    -----|-------------------------|-------
+    1    | Identify task           | DONE
+    2    | Delete task             | DONE
+    3    | Verify deletion         | DONE
+    4a   | AppLocker deny rule     | DONE
+    4b   | Executable disabled     | SKIPPED – AppLocker preferred
+    5    | Confirm no residual     | DONE
+</output_format>
+```
 
 ## Hooks and rules
 

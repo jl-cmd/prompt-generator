@@ -41,12 +41,18 @@ from config.eval_runner import (
     LLM_JUDGE_MODEL,
     LLM_JUDGE_OUTPUT_CHAR_LIMIT,
     LLM_JUDGE_SYSTEM_PROMPT,
+    NESTED_BACKTICK_PATTERN,
+    OUTCOME_DIGEST_HEADING,
+    OUTCOME_DIGEST_PATTERN,
     PROCESS_ONLY_PATTERNS,
     PROSE_AUTHOR_PHRASES,
     REPORT_SEPARATOR_WIDTH,
     REQUIRED_DIGEST_HEADERS,
     VERDICT_COLORS,
     VERDICT_ICONS,
+    XML_FENCE_CLOSE,
+    XML_FENCE_OPEN_PATTERN,
+    XML_FENCE_OPEN_PREFIXES,
 )
 
 Verdict = Literal["PASS", "FAIL", "SKIP"]
@@ -84,13 +90,13 @@ class EvalResult:
 def check_zero_prose_before_fence(text: str) -> CheckResult:
     """Zero prose before the opening xml fence."""
     criterion = "Zero prose before the opening xml fence"
-    lines = text.splitlines()
-    for index, line in enumerate(lines):
-        stripped = line.strip()
-        if stripped.startswith("```xml") or stripped.startswith("``` xml"):
-            if index == 0:
+    all_lines = text.splitlines()
+    for each_line_index, each_line in enumerate(all_lines):
+        stripped = each_line.strip()
+        if any(stripped.startswith(p) for p in XML_FENCE_OPEN_PREFIXES):
+            if each_line_index == 0:
                 return CheckResult(criterion, "PASS", "Fence opens on first line")
-            pre = "\n".join(lines[:index]).strip()
+            pre = "\n".join(all_lines[:each_line_index]).strip()
             if pre:
                 return CheckResult(
                     criterion, "FAIL", f"Found prose before fence: {pre[:80]!r}"
@@ -100,12 +106,12 @@ def check_zero_prose_before_fence(text: str) -> CheckResult:
 
 
 def check_exactly_one_xml_fence(text: str) -> CheckResult:
-    """Exactly one xml fence open and one close."""
-    criterion = "Exactly one xml fence present (one open, one close)"
+    """Exactly one xml fence opening present."""
+    criterion = "Exactly one xml fence present"
     open_count = sum(
         1
-        for line in text.splitlines()
-        if line.strip().startswith("```xml") or line.strip().startswith("``` xml")
+        for each_line in text.splitlines()
+        if any(each_line.strip().startswith(p) for p in XML_FENCE_OPEN_PREFIXES)
     )
     if open_count == 0:
         return CheckResult(criterion, "FAIL", "No xml fence opening found")
@@ -119,29 +125,29 @@ def check_exactly_one_xml_fence(text: str) -> CheckResult:
 def check_zero_prose_between_fence_and_digest(text: str) -> CheckResult:
     """Zero prose between the closing xml fence and ## Outcome digest."""
     criterion = "Zero prose between closing fence and ## Outcome digest"
-    lines = text.splitlines()
+    all_lines = text.splitlines()
 
     fence_close_index: int | None = None
     in_xml_fence = False
-    for index, line in enumerate(lines):
-        stripped = line.strip()
-        if stripped.startswith("```xml") or stripped.startswith("``` xml"):
+    for each_line_index, each_line in enumerate(all_lines):
+        stripped = each_line.strip()
+        if any(stripped.startswith(p) for p in XML_FENCE_OPEN_PREFIXES):
             in_xml_fence = True
-        elif in_xml_fence and stripped == "```":
-            fence_close_index = index
+        elif in_xml_fence and stripped == XML_FENCE_CLOSE:
+            fence_close_index = each_line_index
             in_xml_fence = False
 
     if fence_close_index is None:
         return CheckResult(criterion, "FAIL", "No closing fence found")
 
-    for index in range(fence_close_index + 1, len(lines)):
-        stripped = lines[index].strip()
-        if stripped.startswith("## Outcome digest"):
-            if index == fence_close_index + 1:
+    for each_line_index in range(fence_close_index + 1, len(all_lines)):
+        stripped = all_lines[each_line_index].strip()
+        if stripped.startswith(OUTCOME_DIGEST_HEADING):
+            if each_line_index == fence_close_index + 1:
                 return CheckResult(
                     criterion, "PASS", "Digest follows immediately after fence"
                 )
-            between = "\n".join(lines[fence_close_index + 1 : index]).strip()
+            between = "\n".join(all_lines[fence_close_index + 1 : each_line_index]).strip()
             if between:
                 return CheckResult(
                     criterion,
@@ -160,7 +166,7 @@ def check_zero_prose_between_fence_and_digest(text: str) -> CheckResult:
 def check_outcome_digest_present(text: str) -> CheckResult:
     """## Outcome digest section is present."""
     criterion = "## Outcome digest section present"
-    if "## Outcome digest" in text:
+    if OUTCOME_DIGEST_HEADING in text:
         return CheckResult(criterion, "PASS", "Digest heading found")
     return CheckResult(criterion, "FAIL", "No '## Outcome digest' heading found")
 
@@ -168,7 +174,7 @@ def check_outcome_digest_present(text: str) -> CheckResult:
 def check_four_required_digest_headers(text: str) -> CheckResult:
     """All four required bold headers present in correct order."""
     criterion = "Four required bold headers in order: What it does, Key inputs, Done when, Quick sample"
-    digest_match = re.search(r"## Outcome digest(.*)$", text, re.DOTALL | re.IGNORECASE)
+    digest_match = OUTCOME_DIGEST_PATTERN.search(text)
     if not digest_match:
         return CheckResult(criterion, "FAIL", "No Outcome digest section found")
 
@@ -191,7 +197,7 @@ def check_four_required_digest_headers(text: str) -> CheckResult:
 def check_each_header_has_content(text: str) -> CheckResult:
     """Each required header is followed by at least one sentence of content."""
     criterion = "Each required header followed by substantive content"
-    digest_match = re.search(r"## Outcome digest(.*)$", text, re.DOTALL | re.IGNORECASE)
+    digest_match = OUTCOME_DIGEST_PATTERN.search(text)
     if not digest_match:
         return CheckResult(criterion, "SKIP", "No Outcome digest section to check")
 
@@ -230,18 +236,14 @@ def check_each_header_has_content(text: str) -> CheckResult:
 def check_no_second_xml_fence_in_digest(text: str) -> CheckResult:
     """No second xml fence inside the Outcome digest section."""
     criterion = "No second xml fence inside Outcome digest"
-    digest_match = re.search(r"## Outcome digest(.*)$", text, re.DOTALL | re.IGNORECASE)
+    digest_match = OUTCOME_DIGEST_PATTERN.search(text)
     if not digest_match:
         return CheckResult(criterion, "SKIP", "No Outcome digest section to check")
 
     digest_body = digest_match.group(1)
-    if re.search(r"^```xml", digest_body, re.MULTILINE):
+    if XML_FENCE_OPEN_PATTERN.search(digest_body):
         return CheckResult(
-            criterion, "FAIL", "Found a second ```xml fence inside Outcome digest"
-        )
-    if re.search(r"^``` xml", digest_body, re.MULTILINE):
-        return CheckResult(
-            criterion, "FAIL", "Found a second ``` xml fence inside Outcome digest"
+            criterion, "FAIL", "Found a second xml fence inside Outcome digest"
         )
     return CheckResult(criterion, "PASS", "No second xml fence inside digest")
 
@@ -249,7 +251,7 @@ def check_no_second_xml_fence_in_digest(text: str) -> CheckResult:
 def check_zero_prose_after_digest(text: str) -> CheckResult:
     """Zero trailing prose after the final content of Outcome digest."""
     criterion = "Zero prose after the final content of Outcome digest"
-    digest_match = re.search(r"## Outcome digest(.*)$", text, re.DOTALL | re.IGNORECASE)
+    digest_match = OUTCOME_DIGEST_PATTERN.search(text)
     if not digest_match:
         return CheckResult(criterion, "SKIP", "No Outcome digest section to check")
 
@@ -279,7 +281,7 @@ def check_zero_prose_after_digest(text: str) -> CheckResult:
 def check_digest_not_a_table(text: str) -> CheckResult:
     """Outcome digest uses bullet sections, not a bare markdown table."""
     criterion = "Outcome digest uses bullet sections, not a bare markdown table"
-    digest_match = re.search(r"## Outcome digest(.*)$", text, re.DOTALL | re.IGNORECASE)
+    digest_match = OUTCOME_DIGEST_PATTERN.search(text)
     if not digest_match:
         return CheckResult(criterion, "SKIP", "No Outcome digest section to check")
 
@@ -305,10 +307,58 @@ def check_digest_not_a_table(text: str) -> CheckResult:
     )
 
 
+def check_no_nested_backtick_fences_in_xml(text: str) -> CheckResult:
+    """No triple-backtick code fences appear inside the xml fence content."""
+    criterion = "No triple-backtick code fences inside the xml fence"
+    all_lines = text.splitlines()
+
+    open_index: int | None = None
+    for each_line_index, each_line in enumerate(all_lines):
+        stripped = each_line.strip()
+        if any(stripped.startswith(p) for p in XML_FENCE_OPEN_PREFIXES):
+            open_index = each_line_index
+            break
+
+    if open_index is None:
+        return CheckResult(criterion, "SKIP", "No xml fence found — checked by another criterion")
+
+    digest_index: int | None = None
+    for each_line_index, each_line in enumerate(all_lines):
+        if each_line.strip().startswith(OUTCOME_DIGEST_HEADING):
+            digest_index = each_line_index
+            break
+
+    if digest_index is None:
+        return CheckResult(criterion, "SKIP", "No Outcome digest found — checked by another criterion")
+
+    close_index: int | None = None
+    for each_line_index in range(digest_index - 1, open_index, -1):
+        if all_lines[each_line_index].strip() == XML_FENCE_CLOSE:
+            close_index = each_line_index
+            break
+
+    if close_index is None:
+        return CheckResult(criterion, "FAIL", "No closing fence found before Outcome digest")
+
+    nested_line_numbers = [
+        each_line_index + 1
+        for each_line_index in range(open_index + 1, close_index)
+        if NESTED_BACKTICK_PATTERN.match(all_lines[each_line_index].strip())
+    ]
+    if nested_line_numbers:
+        return CheckResult(
+            criterion,
+            "FAIL",
+            f"Found nested backtick fence(s) at line(s) {nested_line_numbers} inside the xml fence",
+        )
+
+    return CheckResult(criterion, "PASS", "No nested backtick fences inside the xml fence")
+
+
 def check_quick_sample_no_authoring_phrases(text: str) -> CheckResult:
     """Quick sample contains zero prompt-authoring phrases."""
     criterion = "Quick sample contains zero prompt-authoring phrases"
-    digest_match = re.search(r"## Outcome digest(.*)$", text, re.DOTALL | re.IGNORECASE)
+    digest_match = OUTCOME_DIGEST_PATTERN.search(text)
     if not digest_match:
         return CheckResult(criterion, "SKIP", "No Outcome digest section to check")
 
@@ -340,6 +390,7 @@ def run_structural_checks(output_text: str) -> list[CheckResult]:
         check_four_required_digest_headers(output_text),
         check_each_header_has_content(output_text),
         check_no_second_xml_fence_in_digest(output_text),
+        check_no_nested_backtick_fences_in_xml(output_text),
         check_zero_prose_after_digest(output_text),
         check_digest_not_a_table(output_text),
         check_quick_sample_no_authoring_phrases(output_text),
