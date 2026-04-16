@@ -64,7 +64,7 @@ A task that is specific enough to guide execution but contains no personal data 
 /pmin i need to modify or delete the task, and block any future creations of similar tasks from uipath
 ```
 
-`/pmin` infers the platform (Windows Task Scheduler), emits a structured XML prompt with `<role>`, `<instructions>`, and `<output_format>` tags, and produces a step-by-step runbook covering task discovery, deletion, verification, and layered blocking (AppLocker, icacls, executable renaming, service disable). The Outcome digest tells you exactly what commands to run and what success looks like — no PII required, no session context carried over.
+`/pmin` infers the platform (Windows Task Scheduler) and emits a structured XML prompt with `<role>`, `<instructions>`, and `<output_format>` tags that instruct a downstream agent to generate a step-by-step runbook covering task discovery, deletion, verification, and layered blocking (AppLocker, icacls, executable renaming, service disable). The Outcome digest summarizes the intended scope and verification criteria for that generated runbook — no PII required, no session context carried over.
 
 ## Hooks and rules
 
