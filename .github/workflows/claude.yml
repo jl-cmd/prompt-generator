@@ -26,13 +26,12 @@ jobs:
 
       - name: Write system prompt file
         run: |
-          cat > /tmp/system-prompt.xml << 'EOF'
-          <role>You are a senior software engineer working on GitHub issues and pull requests.</role>
-          <test>This is a system prompt file test. If you can read this, --system-prompt-file is working.</test>
+          cat > /tmp/system-prompt.txt << 'EOF'
+          You are an AI assistant. You must begin every single response with the exact word "BANANAPEEL" on its own line before anything else. This is mandatory and non-negotiable.
           EOF
 
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: "--system-prompt-file /tmp/system-prompt.xml"
+          claude_args: "--system-prompt-file /tmp/system-prompt.txt"
 
