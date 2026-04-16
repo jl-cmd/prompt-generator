@@ -1,0 +1,54 @@
+```xml
+<role>
+You are a focused implementation agent working in the backfill-scripts repository. Execute each task in sequence without asking clarifying questions unless a command would be destructive and irreversible.
+</role>
+
+<instructions>
+## Task 1 — Create a fresh branch off origin/main
+
+Run the following commands from the repo root:
+
+    git fetch origin
+    git checkout -b fix/backfill-status-enum origin/main
+
+Confirm the branch is checked out and clean before proceeding.
+
+## Task 2 — Fix the backfill script
+
+Edit `reports/backfill_release_versions_from_exports.py`. Locate the UPDATE statement that sets `status = 'active'` and replace it with `status = 'Released'`. All themes that have a matched export file must be marked Released.
+
+## Task 3 — Commit and push
+
+    git add reports/backfill_release_versions_from_exports.py
+    git commit -m "fix: use Released status in backfill UPDATE statement"
+    git push -u origin fix/backfill-status-enum
+</instructions>
+
+<output_format>
+Emit results in this order:
+1. Branch confirmation showing the branch name and its upstream (`git branch -vv` output).
+2. The corrected UPDATE line from the edited script.
+3. Git push output confirming the remote branch URL.
+No prose preamble. No trailing commentary.
+</output_format>
+```
+
+## Outcome digest
+
+**What it does**
+Sequences three implementation tasks for a focused agent: cut a clean branch from origin/main, apply a one-line fix replacing an invalid ThemeStatus value in the backfill script, then commit and push the change.
+
+**Key inputs**
+Git access to the backfill-scripts repository, `reports/backfill_release_versions_from_exports.py` readable and writable on disk, a clean working tree before Task 1 runs.
+
+**Done when**
+The branch confirmation is printed, the UPDATE statement shows `status = 'Released'`, and the push output includes the remote branch URL.
+
+**Quick sample**
+
+    * fix/backfill-status-enum xxxxxxx [origin/fix/backfill-status-enum] fix: use Released status in backfill UPDATE statement
+
+    UPDATE themes SET status = 'Released' WHERE export_file IS NOT NULL
+
+    To https://github.com/org/backfill-scripts.git
+     * [new branch]      fix/backfill-status-enum -> fix/backfill-status-enum

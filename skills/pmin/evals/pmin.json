@@ -78,6 +78,18 @@
         "Zero prose after the final bullet of ## Outcome digest",
         "No 'Here is the formatted prompt:' or similar framing sentence before the fence"
       ]
+    },
+    {
+      "id": 7,
+      "name": "pmin_no_nested_backtick_fences",
+      "scenario": "Fence safety — input with shell code blocks must not produce nested backtick fences inside the xml fence",
+      "prompt": "/pmin You are a focused implementation agent working in the backfill-scripts repository. Execute each task below in sequence without asking clarifying questions unless a command would be destructive and irreversible.\n\n## Task 1 — Create a fresh branch off origin/main\n\nRun:\n```\ngit fetch origin\ngit checkout -b fix/backfill-status-enum origin/main\n```\n\nConfirm the branch is checked out and clean before proceeding.\n\n## Task 2 — Fix the backfill script\n\nEdit `reports/backfill_release_versions_from_exports.py`. Locate the UPDATE statement that sets `status = 'active'` and change it to `status = 'Released'`. All themes that have a matched export file should be marked Released.\n\n## Task 3 — Commit and push\n\n```\ngit add reports/backfill_release_versions_from_exports.py\ngit commit -m \"fix: use Released status in backfill UPDATE statement\"\ngit push -u origin fix/backfill-status-enum\n```\n\nOutput results in order: branch confirmation, the edited UPDATE line, push confirmation URL.",
+      "files": [],
+      "expected_behavior": [
+        "No triple-backtick code fences inside the xml fence",
+        "Shell commands and code samples use 4-space indented text",
+        "Output is exactly one xml fence followed immediately by ## Outcome digest — zero prose before the fence, zero prose after the digest"
+      ]
     }
   ]
 }
