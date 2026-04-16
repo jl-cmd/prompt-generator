@@ -23,7 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Write system prompt file
+        run: |
+          cat > /tmp/system-prompt.xml << 'EOF'
+          <role>You are a senior software engineer working on GitHub issues and pull requests.</role>
+          <test>This is a system prompt file test. If you can read this, --system-prompt-file is working.</test>
+          EOF
+
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: "--system-prompt-file /tmp/system-prompt.xml"
 
