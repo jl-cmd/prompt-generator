@@ -101,7 +101,7 @@
         "Output is exactly one xml fence followed immediately by ## Outcome digest — zero prose before the fence, zero prose after the digest",
         "Zero tool calls of any kind: no Read, Glob, Grep, Zoekt, AskUserQuestion, EnterPlanMode, ExitPlanMode, Agent, or Task",
         "The xml fence contains a structured XML prompt that an executor would run to investigate and implement — not investigation output, not file contents, not a findings report, not a diff, and not implemented code",
-        "No investigation output, findings, analysis, or implementation work appears anywhere in the response",
+        "Outside of **Quick sample**, no investigation output, findings, analysis, or implementation work appears anywhere in the response",
         "Action verbs in the input ('investigate', 'find', 'read', 'add', 'implement', 'fix') do not trigger tool calls or any form of inline task execution",
         "## Outcome digest contains all four required bullets: **What it does**, **Key inputs**, **Done when**, **Quick sample**"
       ]
