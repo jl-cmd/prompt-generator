@@ -1,0 +1,9 @@
+Inline answer (per skills/agent-prompt/SKILL.md "When to stay inline"): this is a single-file JSON validity check. Running prompt-generator and spawning a subagent for a one-line JSON parse would add overhead without benefit.
+
+Result: yes. `skills/agent-prompt/evals/agent-prompt.json` is valid JSON.
+
+- Parsed successfully as a JSON object with top-level keys: `skill_name`, `source`, `depends_on`, `trigger_queries`, `evals`.
+- `evals` is an array of 6 objects (ids 1-6), each with `id`, `name`, `scenario`, `prompt`, `files`, `expected_behavior`.
+- No trailing commas, unbalanced braces, or syntax errors.
+
+No subagent spawn performed; no prompt-generator workflow invoked.

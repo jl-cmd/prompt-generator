@@ -1,0 +1,73 @@
+E1 [prompt_type] user-task
+E2 [role] backend API engineer
+E3 [instructions] primary task = add a new API endpoint that returns the current user's preferences
+E4 [instructions] route = GET /api/v1/users/me/preferences
+E5 [instructions] auth = require an authenticated session; reject unauthenticated requests with 401
+E6 [instructions] response shape = JSON object keyed by preference name with scalar values
+E7 [scope] target_file_globs = ["api/routes/*.py", "api/models/preferences.py", "tests/api/test_preferences.py"]
+E8 [output_format] shape = route handler, request schema, response schema, and one integration test
+E9 [output_format] done_when = integration test passes for an authenticated user and returns 401 for an unauthenticated request
+
+```xml
+<role>
+  <!-- E2.1 -->
+  Backend API engineer.
+</role>
+<instructions>
+  <primary_task>
+    <!-- E3.1 -->
+    Add a new API endpoint that returns the current user's preferences.
+  </primary_task>
+  <route>
+    <!-- E4.1 -->
+    GET /api/v1/users/me/preferences.
+  </route>
+  <auth>
+    <!-- E5.1 -->
+    Require an authenticated session.
+    <!-- E5.2 -->
+    Reject unauthenticated requests with status 401.
+  </auth>
+  <response_shape>
+    <!-- E6.1 -->
+    JSON object keyed by preference name with scalar values.
+  </response_shape>
+</instructions>
+<scope>
+  <target_file_globs>
+    <!-- E7.1 -->
+    api/routes/*.py, api/models/preferences.py, and tests/api/test_preferences.py
+  </target_file_globs>
+</scope>
+<output_format>
+  <!-- E8.1 -->
+  Route handler, request schema, response schema, and one integration test.
+  <!-- E9.1 -->
+  Integration test passes for an authenticated user.
+  <!-- E9.2 -->
+  Returns 401 for an unauthenticated request.
+</output_format>
+```
+
+## Outcome digest
+
+**What it does**
+Adds a GET /api/v1/users/me/preferences endpoint that returns the authenticated user's preferences as a flat JSON object, rejecting unauthenticated requests with 401.
+
+**Key inputs**
+Existing route, model, and test files under api/routes/, api/models/preferences.py, and tests/api/test_preferences.py.
+
+**Done when**
+The integration test passes for an authenticated user and returns 401 for an unauthenticated request.
+
+**Quick sample**
+
+    GET /api/v1/users/me/preferences
+    Authorization: Bearer <token>
+
+    200 OK
+    {
+      "theme": "dark",
+      "notifications_email": true,
+      "timezone": "America/New_York"
+    }

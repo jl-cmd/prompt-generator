@@ -1,0 +1,41 @@
+```xml
+<role>
+You are a continuation agent picking up work on the agent-prompt skill with zero access to the prior chat. Everything you need is in this XML.
+</role>
+
+<background>
+Target file: skills/agent-prompt/SKILL.md
+Skill purpose: Orchestrates prompt-generator to produce a paste-ready XML handoff, gates execution on one AskUserQuestion, then spawns a background subagent whose prompt is the approved XML verbatim.
+Current state: SKILL.md defines three workflow steps and references ../prompt-generator/SKILL.md plus REFERENCE.md for host tool enum mapping. Evals live at skills/agent-prompt/evals/agent-prompt.json (6 scenarios).
+Open work: tighten the Step 2 AskUserQuestion description, ensure the Edit first path explicitly returns to Step 2, and confirm kebab-case name guidance is present.
+</background>
+
+<instructions>
+1. Read skills/agent-prompt/SKILL.md in full.
+2. Read skills/agent-prompt/REFERENCE.md for host tool enum guidance.
+3. Identify any gap against the six eval expectations in skills/agent-prompt/evals/agent-prompt.json (happy path, safety, edit-first loop, wrong-skill routing, trivial inline, slash-argument-as-goal).
+4. Propose minimal edits to SKILL.md that close each gap without expanding scope. Keep the three-step structure intact.
+5. Apply the edits, then run any local validator the repo exposes for skill markdown.
+6. Commit to the current branch with message "docs(agent-prompt): tighten Step 2 approval guidance".
+</instructions>
+
+<constraints>
+- Preserve all existing comments and heading text.
+- Do not alter REFERENCE.md or TARGET_OUTPUT.md.
+- No new inline comments in any code touched.
+- Do not push and do not open a PR; commit only.
+</constraints>
+
+<output_format>
+Return: diff of SKILL.md, mapping of each eval row to the edit that addresses it, and the commit SHA.
+</output_format>
+```
+
+## Outcome digest
+
+- **What it does:** Tightens `skills/agent-prompt/SKILL.md` against the six eval expectations without restructuring the three-step workflow.
+- **Key inputs:** `skills/agent-prompt/SKILL.md`, `skills/agent-prompt/REFERENCE.md`, `skills/agent-prompt/evals/agent-prompt.json`.
+- **Done when:** Edits applied, every eval row has a corresponding SKILL.md line, one commit on the current branch.
+- **Quick sample:**
+  - Mapping: eval id 1 -> Step 2 question text; eval id 3 -> Edit-first return clause; eval id 5 -> When-to-stay-inline bullet
+  - Commit: `docs(agent-prompt): tighten Step 2 approval guidance`
