@@ -37,6 +37,7 @@ from config.eval_runner import (
     EVAL_SPECS,
     GROQ_BASE_URL,
     GROQ_JUDGE_MODEL,
+    JSON_REPORT_INDENT,
     LLM_JUDGE_MAX_TOKENS,
     LLM_JUDGE_MODEL,
     LLM_JUDGE_OUTPUT_CHAR_LIMIT,
@@ -63,6 +64,8 @@ class CheckResult:
     criterion: str
     verdict: Verdict
     reason: str
+    rule_id: Optional[str] = None
+    offending_span: Optional[str] = None
 
 
 @dataclass
@@ -605,15 +608,87 @@ def print_report(all_results: list[EvalResult]) -> None:
 
 
 # ---------------------------------------------------------------------------
+# JSON serialization for reflection pipeline
+# ---------------------------------------------------------------------------
+
+
+def check_result_to_dict(check: CheckResult) -> dict:
+    """Serialize a CheckResult to a JSON-safe dict, including structured fields."""
+    return {
+        "criterion": check.criterion,
+        "verdict": check.verdict,
+        "reason": check.reason,
+        "rule_id": check.rule_id,
+        "offending_span": check.offending_span,
+    }
+
+
+def eval_result_to_dict(eval_outcome: EvalResult) -> dict:
+    """Serialize an EvalResult (with all checks) to a JSON-safe dict."""
+    return {
+        "skill": eval_outcome.skill,
+        "eval_id": eval_outcome.eval_id,
+        "eval_name": eval_outcome.eval_name,
+        "scenario": eval_outcome.scenario,
+        "passed": eval_outcome.passed,
+        "fail_count": eval_outcome.fail_count,
+        "checks": [check_result_to_dict(check) for check in eval_outcome.checks],
+    }
+
+
+def build_json_report(all_results: list[EvalResult]) -> dict:
+    """Build the full JSON report shape for --json output mode."""
+    total_evals = len(all_results)
+    passed_evals = sum(1 for each_outcome in all_results if each_outcome.passed)
+    return {
+        "evals": [eval_result_to_dict(each_outcome) for each_outcome in all_results],
+        "summary": {
+            "total": total_evals,
+            "passed": passed_evals,
+            "failed": total_evals - passed_evals,
+        },
+    }
+
+
+def collect_all_results() -> Optional[list[EvalResult]]:
+    """Run every configured eval and return the full list of results.
+
+    Returns ``None`` when any configured spec file is missing, matching the
+    abort-on-missing-spec behavior of the text-mode branch so ``--json``
+    consumers never receive a silently-truncated report.
+    """
+    all_results: list[EvalResult] = []
+    for skill, spec_path, output_dir in EVAL_SPECS:
+        if not spec_path.exists():
+            print(f"ERROR: Eval spec not found: {spec_path}", file=sys.stderr)
+            return None
+        spec = load_eval_spec(spec_path)
+        for eval_spec in spec["evals"]:
+            each_outcome = run_eval(skill, eval_spec, output_dir)
+            all_results.append(each_outcome)
+    return all_results
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
 
 def main() -> int:
     """Run all evals and return 0 on full pass, 1 on any failure."""
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
-    all_results: list[EvalResult] = []
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined] # reason: reconfigure is a runtime-only method not in the TextIO stub
+    is_json_mode = "--json" in sys.argv[1:]
 
+    if is_json_mode:
+        collected_results = collect_all_results()
+        if collected_results is None:
+            return 1
+        report_payload = build_json_report(collected_results)
+        print(json.dumps(report_payload, indent=JSON_REPORT_INDENT))
+        has_failures = any(not each_outcome.passed for each_outcome in collected_results)
+        return 1 if has_failures else 0
+
+    all_results = []
     for skill, spec_path, output_dir in EVAL_SPECS:
         if not spec_path.exists():
             print(f"ERROR: Eval spec not found: {spec_path}", file=sys.stderr)
@@ -623,14 +698,14 @@ def main() -> int:
         print(f"\nRunning {len(spec['evals'])} evals for skill: {skill}")
 
         for eval_spec in spec["evals"]:
-            result = run_eval(skill, eval_spec, output_dir)
-            all_results.append(result)
-            status = "PASS" if result.passed else "FAIL"
+            each_outcome = run_eval(skill, eval_spec, output_dir)
+            all_results.append(each_outcome)
+            status = "PASS" if each_outcome.passed else "FAIL"
             print(f"  [{status}] {eval_spec['id']}: {eval_spec['name']}")
 
     print_report(all_results)
 
-    has_failures = any(not result.passed for result in all_results)
+    has_failures = any(not each_outcome.passed for each_outcome in all_results)
     return 1 if has_failures else 0
 
 
