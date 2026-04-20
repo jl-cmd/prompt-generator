@@ -12,6 +12,7 @@
         "skills/agent-prompt/",
         "skills/pmid/",
         "skills/pmin/",
+        "skills/pmax/",
         "hooks/blocking/prompt_workflow_gate_config.py",
         "hooks/blocking/prompt_workflow_gate_core.py",
         "hooks/blocking/prompt_workflow_validate.py",

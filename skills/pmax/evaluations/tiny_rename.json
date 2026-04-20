@@ -1,0 +1,12 @@
+{
+  "skills": ["pmax"],
+  "query": "/pmax prompt for renaming calc_total to compute_cart_total across the codebase",
+  "files": [],
+  "expected_behavior": [
+    "Skill asks 3 or fewer questions total across all Phase 2 rounds.",
+    "Skill does not spawn sub-questions on unrelated dimensions (no tone, no style, no persona questions for a rename task).",
+    "The final XML is under 30 lines.",
+    "Phase 2 ends automatically once required sections have entries; the skill does not keep asking after coverage is detected.",
+    "Every sentence in the final XML has a backing <!-- E#.# --> comment."
+  ]
+}
