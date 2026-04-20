@@ -1,5 +1,6 @@
 """Smoke tests for config.eval_runner: verify module imports and regex patterns compile."""
 
+import json
 import re
 from pathlib import Path
 
@@ -102,6 +103,33 @@ class TestReflectionPromptRoundTwoAuditFindings:
     def test_should_still_include_skill_line_citation_example(self) -> None:
         reflection_prompt_text = eval_runner.REFLECTION_SYSTEM_PROMPT
         assert "SKILL line" in reflection_prompt_text
+
+
+class TestEvalSpecsCoverEverySkill:
+    """EVAL_SPECS must list every skill whose eval JSON is wired into run_evals.py."""
+
+    def test_should_include_all_five_skills(self) -> None:
+        skill_names = {each_spec[0] for each_spec in eval_runner.EVAL_SPECS}
+        assert skill_names == {"pmid", "pmin", "agent-prompt", "prompt-generator", "pmax"}
+
+    def test_every_spec_path_should_exist_on_disk(self) -> None:
+        repo_root = Path(__file__).resolve().parent.parent
+        for each_skill, each_spec_path, _ in eval_runner.EVAL_SPECS:
+            assert (repo_root / each_spec_path).exists(), (
+                f"EVAL_SPECS entry for {each_skill} points at missing file {each_spec_path}"
+            )
+
+    def test_every_spec_should_parse_as_canonical_evals_shape(self) -> None:
+        repo_root = Path(__file__).resolve().parent.parent
+        for each_skill, each_spec_path, _ in eval_runner.EVAL_SPECS:
+            spec_data = json.loads((repo_root / each_spec_path).read_text(encoding="utf-8"))
+            assert "evals" in spec_data, f"{each_skill} spec has no 'evals' key"
+            assert isinstance(spec_data["evals"], list)
+            assert len(spec_data["evals"]) > 0
+            for each_item in spec_data["evals"]:
+                assert "id" in each_item
+                assert "name" in each_item
+                assert "expected_behavior" in each_item
 
 
 class TestVerdictColorsInlined:

@@ -1,4 +1,4 @@
-"""Static configuration for the pmin and pmid skill eval runner."""
+"""Static configuration for the skill eval runner (pmid, pmin, agent-prompt, prompt-generator, pmax)."""
 
 import re
 from pathlib import Path
@@ -198,6 +198,21 @@ EVAL_SPECS: list[tuple[str, Path, Path]] = [
     (
         "pmin",
         Path("skills/pmin/evals/pmin.json"),
+        Path("data/prompts"),
+    ),
+    (
+        "agent-prompt",
+        Path("skills/agent-prompt/evals/agent-prompt.json"),
+        Path("data/prompts"),
+    ),
+    (
+        "prompt-generator",
+        Path("skills/prompt-generator/evals/prompt-generator.json"),
+        Path("data/prompts"),
+    ),
+    (
+        "pmax",
+        Path("skills/pmax/evals/pmax.json"),
         Path("data/prompts"),
     ),
 ]
