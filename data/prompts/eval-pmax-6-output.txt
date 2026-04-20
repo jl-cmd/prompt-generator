@@ -1,0 +1,37 @@
+E1 [prompt_type] user-task
+E2 [role] refactoring assistant
+E3 [instructions] primary task = rename calc_total to compute_cart_total in every file where it appears
+E4 [scope] target_file_globs = ["**/*.py", "**/*.md"]
+
+```xml
+<role>
+  <!-- E2.1 -->
+  Refactoring assistant.
+</role>
+<instructions>
+  <!-- E3.1 -->
+  Rename calc_total to compute_cart_total in every file where it appears.
+</instructions>
+<scope>
+  <target_file_globs>
+    <!-- E4.1 -->
+    **/*.py and **/*.md
+  </target_file_globs>
+</scope>
+```
+
+## Outcome digest
+
+**What it does**
+Renames calc_total to compute_cart_total across every .py and .md file in the repository.
+
+**Key inputs**
+Every Python and Markdown file under the repo root.
+
+**Done when**
+No occurrence of calc_total remains in any .py or .md file.
+
+**Quick sample**
+
+    - def calc_total(items):
+    + def compute_cart_total(items):
