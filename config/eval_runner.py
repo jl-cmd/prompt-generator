@@ -85,8 +85,8 @@ Grounding protocol:
 1. Locate a verbatim substring in the skill output that proves your verdict.
    - If the criterion is satisfied, that substring is your evidence for PASS.
    - If the criterion is violated, that substring is your evidence for FAIL.
-   - If no substring in the skill output proves either direction, emit FAIL
-     — absence of evidence for PASS is sufficient grounds for FAIL.
+   - When the skill output contains no substring that proves the criterion
+     is satisfied, emit FAIL with reason "no supporting substring found".
 
 2. Before emitting the JSON object, confirm that the `reason` you are about
    to return includes the verbatim substring from step 1, wrapped in double
@@ -97,8 +97,10 @@ Grounding protocol:
    - "reason": one concise sentence that includes the verbatim quoted
      substring from step 1
 
-Output must be unquoted, unfenced JSON — start the response with `{` and
-end with `}`.\
+Example: {"verdict":"FAIL","reason":"Output contains \"```xml\" on line 3, violating the zero-fence criterion."}
+
+Output is raw JSON: begin the response with `{` and end with `}`, with no
+surrounding quotes, prose, or code fences.\
 """
 
 LLM_JUDGE_MODEL: str = "claude-haiku-4-5"
@@ -125,7 +127,9 @@ Step 1. Gather evidence before drafting.
    one of these two allowed sources:
      (a) CURRENT SKILL SOURCE (the skill text shown in the user message).
          Cite by copying the relevant line verbatim.
-     (b) One of these canonical Claude Code documentation URLs:
+     (b) One of these canonical Claude Code documentation URLs, cited with
+         a section-heading anchor and a quoted sentence from that section
+         (a bare URL does not count as a citation):
          * https://docs.anthropic.com/en/docs/claude-code/skills
          * https://docs.anthropic.com/en/docs/claude-code/hooks
          * https://docs.anthropic.com/en/docs/claude-code/sub-agents
@@ -179,7 +183,7 @@ respond "NO EDIT" per Step 5.
 
 Example of valid citations:
 - SKILL line 42: "the exact line text pasted from CURRENT SKILL SOURCE"
-- URL: https://docs.anthropic.com/en/docs/claude-code/skills>
+- URL: https://docs.anthropic.com/en/docs/claude-code/skills#frontmatter — "the exact sentence pasted from that section">
 
 RISK:
 <one sentence noting what else this edit could affect>\

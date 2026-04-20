@@ -76,6 +76,34 @@ class TestReflectionPromptSpecificity:
         assert "Example of valid citations" in reflection_prompt_text
 
 
+class TestJudgePromptRoundTwoAuditFindings:
+    """Round-2 audit: positive phrasing, raw-JSON sentence, and example block."""
+
+    def test_should_use_new_fail_on_no_evidence_wording(self) -> None:
+        judge_prompt_text = eval_runner.LLM_JUDGE_SYSTEM_PROMPT
+        assert "no supporting substring found" in judge_prompt_text
+
+    def test_should_use_new_raw_json_sentence(self) -> None:
+        judge_prompt_text = eval_runner.LLM_JUDGE_SYSTEM_PROMPT
+        assert "Output is raw JSON:" in judge_prompt_text
+
+    def test_should_contain_verdict_example_block(self) -> None:
+        judge_prompt_text = eval_runner.LLM_JUDGE_SYSTEM_PROMPT
+        assert 'Example: {"verdict":"FAIL"' in judge_prompt_text
+
+
+class TestReflectionPromptRoundTwoAuditFindings:
+    """Round-2 audit: URL citations must include a section-heading anchor."""
+
+    def test_should_require_section_anchor_in_citations_example(self) -> None:
+        reflection_prompt_text = eval_runner.REFLECTION_SYSTEM_PROMPT
+        assert "#" in reflection_prompt_text.split("Example of valid citations")[1]
+
+    def test_should_still_include_skill_line_citation_example(self) -> None:
+        reflection_prompt_text = eval_runner.REFLECTION_SYSTEM_PROMPT
+        assert "SKILL line" in reflection_prompt_text
+
+
 class TestVerdictColorsInlined:
     """Color escape codes live inside VERDICT_COLORS, not as separate file-global constants."""
 

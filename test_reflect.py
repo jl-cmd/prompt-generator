@@ -75,6 +75,22 @@ class TestExtractFailingChecks:
         assert only_failure["rule_id"] == "RULE_B"
 
 
+class TestBuildReflectionPromptPositiveDirective:
+    """build_reflection_prompt NO EDIT sentence uses positive-directive phrasing."""
+
+    def test_should_begin_no_edit_sentence_with_respond(self) -> None:
+        failing_check = {
+            "skill": "pmid",
+            "eval_id": 1,
+            "criterion": "crit",
+            "reason": "r",
+            "rule_id": None,
+            "offending_span": None,
+        }
+        prompt_text = build_reflection_prompt(failing_check, skill_source="body")
+        assert "Respond exactly" in prompt_text
+
+
 class TestBuildReflectionPromptReinforcesNoEditOption:
     """User message restates the NO EDIT escape hatch close to the data."""
 
