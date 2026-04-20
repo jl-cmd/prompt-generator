@@ -1,0 +1,13 @@
+{
+  "skills": ["pmax"],
+  "query": "/pmax build a prompt for migrating the theme_db schema so new entries add a theme_db_id primary key and content_id becomes nullable, with a backfill for existing rows",
+  "files": ["Y:/Projects/theme_db/schema.sql"],
+  "expected_behavior": [
+    "Phase 0 silently reads schema.sql and identifies tables affected before any AskUserQuestion fires.",
+    "Phase 2 asks about schema changes in hierarchical rounds where a parent decision spawns child decisions (e.g. chosen primary key type spawns follow-up about backfill strategy).",
+    "Every AskUserQuestion option uses plain language; any technical term includes a plain-language explanation in the description.",
+    "The final XML contains an <!-- E#.# --> HTML comment before every sentence, with no sentence missing a backing entry.",
+    "No XML section appears in the final prompt unless at least one ledger entry populated it.",
+    "The Outcome preview bullets in Phase 5 mention every ledger entry present at end of Phase 4."
+  ]
+}
