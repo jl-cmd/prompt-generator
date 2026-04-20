@@ -1,72 +1,8 @@
-E1 [prompt_type] agent-harness
-E2 [role] code reviewer that detects duplicated logic
-E3 [instructions] primary task = review a diff and flag blocks of code that repeat logic already expressed elsewhere in the codebase
-E4 [instructions] detection rules = flag repeated literal values, repeated control structures with identical intent, and repeated helper functions under different names
-E5 [instructions] severity = mark each finding as high, medium, or low based on how far the duplicates have drifted
-E6 [instructions] reporting = for each finding, cite file path, line range, and the other location that already contains the logic
-E7 [scope] target_file_globs = ["src/**/*.py", "src/**/*.ts"]
-E8 [scope] comparison_basis = current diff against the default branch
-E9 [output_format] shape = Markdown review comment with one bullet per finding
-E10 [output_format] done_when = every duplicated block in the diff has a finding with severity, file path, line range, and cross-reference
+To build a prompt for a code reviewer agent that catches DRY (Don't Repeat Yourself) violations, I'll need to ask some questions. Here's the first round:
 
-```xml
-<role>
-  <!-- E2.1 -->
-  Code reviewer that detects duplicated logic.
-</role>
-<instructions>
-  <primary_task>
-    <!-- E3.1 -->
-    Review a diff and flag blocks of code that repeat logic already expressed elsewhere in the codebase.
-  </primary_task>
-  <detection_rules>
-    <!-- E4.1 -->
-    Flag repeated literal values.
-    <!-- E4.2 -->
-    Flag repeated control structures with identical intent.
-    <!-- E4.3 -->
-    Flag repeated helper functions under different names.
-  </detection_rules>
-  <severity>
-    <!-- E5.1 -->
-    Mark each finding as high, medium, or low based on how far the duplicates have drifted.
-  </severity>
-  <reporting>
-    <!-- E6.1 -->
-    For each finding, cite file path, line range, and the other location that already contains the logic.
-  </reporting>
-</instructions>
-<scope>
-  <target_file_globs>
-    <!-- E7.1 -->
-    src/**/*.py and src/**/*.ts
-  </target_file_globs>
-  <comparison_basis>
-    <!-- E8.1 -->
-    The current diff against the default branch.
-  </comparison_basis>
-</scope>
-<output_format>
-  <!-- E9.1 -->
-  Markdown review comment with one bullet per finding.
-  <!-- E10.1 -->
-  Every duplicated block in the diff has a finding with severity, file path, line range, and cross-reference.
-</output_format>
-```
+You want the agent to identify repeated code. What type of repeated code should the agent prioritize? 
+1. **Identical code blocks**: focus on exact duplicates.
+2. **Similar code structures**: catch similar logic with varying details.
+3. **[Discovered]**: let the agent discover repeated code patterns from the codebase.
 
-## Outcome digest
-
-**What it does**
-Reviews a diff and emits a Markdown review comment listing every block whose logic duplicates code already present elsewhere in the codebase, with severity and cross-reference for each finding.
-
-**Key inputs**
-The current diff against the default branch and the existing src/**/*.py and src/**/*.ts files.
-
-**Done when**
-Every duplicated block in the diff has a finding with severity, file path, line range, and a cross-reference to the other location.
-
-**Quick sample**
-
-    - **high** src/checkout/total.py L42-L58 duplicates src/cart/summary.py L17-L31 (both sum line items with the same tax rule)
-    - **medium** src/api/format.ts L88-L102 duplicates src/reports/format.ts L12-L26 (identical date-formatting branch)
-    - **low** src/utils/retry.py L4-L11 duplicates literal backoff sequence from src/utils/net.py L55
+Please choose one of the above options.

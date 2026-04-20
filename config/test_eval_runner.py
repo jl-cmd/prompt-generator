@@ -132,6 +132,22 @@ class TestEvalSpecsCoverEverySkill:
                 assert "expected_behavior" in each_item
 
 
+class TestCaptureRetryConstants:
+    """capture_all.py pulls its retry/throttle knobs from config so they stay out of the script body."""
+
+    def test_should_expose_inter_request_throttle_seconds(self) -> None:
+        assert eval_runner.CAPTURE_INTER_REQUEST_THROTTLE_SECONDS > 0
+
+    def test_should_expose_max_retries_per_job(self) -> None:
+        assert eval_runner.CAPTURE_MAX_RETRIES_PER_JOB >= 1
+
+    def test_should_expose_retry_backoff_base_seconds(self) -> None:
+        assert eval_runner.CAPTURE_RETRY_BACKOFF_BASE_SECONDS > 0
+
+    def test_should_expose_retry_backoff_exponent_base(self) -> None:
+        assert eval_runner.CAPTURE_RETRY_BACKOFF_EXPONENT_BASE == 2
+
+
 class TestVerdictColorsInlined:
     """Color escape codes live inside VERDICT_COLORS, not as separate file-global constants."""
 

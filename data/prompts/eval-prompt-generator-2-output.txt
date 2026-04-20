@@ -1,1 +1,15 @@
-SKILL_INVOCATION_SKIPPED: budget
+### Outcome preview
+To continue addressing the theme export race condition and complete the modifications to `download_manager.py` and `orchestrator.py`, I've prepared a handoff prompt. This prompt includes the necessary context and next steps to ensure a seamless continuation of the work in a new session. 
+
+* The prompt is designed to guide the next session through the current state of the modifications and the decisions made regarding the retry logic.
+* It outlines the files that have been modified (`download_manager.py` and `orchestrator.py`) and the key aspects of the retry logic that have been decided.
+* The goal is to allow the new session to pick up where the current work left off, focusing on finalizing the modifications and ensuring the retry logic is appropriately implemented to handle the theme export race condition.
+
+### AskUserQuestion
+Does this outcome preview align with your expectations for continuing the work on the theme export race condition and the modifications to `download_manager.py` and `orchestrator.py`?
+
+1. **Ship this outcome profile** - Confirm that the details are correct and the new session can proceed with the provided handoff prompt.
+2. **Refine with free text** - Provide additional context or modify the approach outlined in the handoff prompt.
+3. **Modify scope** - Change the focus of the handoff prompt to include or exclude specific aspects of the current work.
+
+Please select one of the options above.

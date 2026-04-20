@@ -1,73 +1,11 @@
-E1 [prompt_type] user-task
-E2 [role] project status reporter
-E3 [instructions] primary task = generate a weekly status report by reading bug tracker exports and summarizing open, closed, and stalled issues
-E4 [instructions] report sections = headline counts, top regressions, stalled tickets older than 14 days, closed-this-week list
-E5 [scope] target_file_globs = ["exports/bugs_*.csv"]
-E6 [scope] comparison_basis = prior week's export in the same folder
-E7 [output_format] shape = single Markdown document with H2 sections per report section
-E8 [output_format] done_when = every open bug in the current export appears in exactly one section; counts reconcile with the raw row totals
+To build a prompt for generating weekly status reports from a bug tracker, I'll guide you through a series of questions. Your input will help shape the final prompt. 
 
-```xml
-<role>
-  <!-- E2.1 -->
-  Project status reporter.
-</role>
-<instructions>
-  <primary_task>
-    <!-- E3.1 -->
-    Generate a weekly status report by reading bug tracker exports.
-    <!-- E3.2 -->
-    Summarize open, closed, and stalled issues.
-  </primary_task>
-  <report_sections>
-    <!-- E4.1 -->
-    Headline counts.
-    <!-- E4.2 -->
-    Top regressions.
-    <!-- E4.3 -->
-    Stalled tickets older than fourteen days.
-    <!-- E4.4 -->
-    Closed-this-week list.
-  </report_sections>
-</instructions>
-<scope>
-  <target_file_globs>
-    <!-- E5.1 -->
-    exports/bugs_*.csv
-  </target_file_globs>
-  <comparison_basis>
-    <!-- E6.1 -->
-    Prior week's export in the same folder.
-  </comparison_basis>
-</scope>
-<output_format>
-  <!-- E7.1 -->
-  Single Markdown document with H2 sections per report section.
-  <!-- E8.1 -->
-  Every open bug in the current export appears in exactly one section.
-  <!-- E8.2 -->
-  Counts reconcile with raw row totals.
-</output_format>
-```
+Here's your first question:
 
-## Outcome digest
+What would you like to focus on in these weekly status reports?
+A) Bug trends and distribution by severity
+B) Progress toward specific project milestones 
+C) [discovered] Bug tracker metadata (e.g., open tickets, closed tickets, top contributors)
+D) Custom metrics (please describe)
 
-**What it does**
-Reads the latest bug-tracker CSV export, compares it to the prior week's export, and emits a Markdown status report with headline counts, top regressions, stalled tickets, and closed-this-week tickets.
-
-**Key inputs**
-Current and prior weekly CSV exports in the exports/ folder matching bugs_*.csv.
-
-**Done when**
-Every open bug in the current export appears in exactly one section and the counts reconcile with raw row totals.
-
-**Quick sample**
-
-    ## Headline counts
-    Open: 47 (+3 from last week)
-    Closed this week: 12
-    Stalled (>14 days no update): 8
-
-    ## Top regressions
-    BUG-1204  login retry loop after password reset
-    BUG-1198  export CSV truncates unicode titles
+Please choose one of the above options.

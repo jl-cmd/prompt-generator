@@ -1,70 +1,9 @@
-E1 [prompt_type] user-task
-E2 [role] release notes writer
-E3 [instructions] primary task = generate release notes from a list of merged pull requests
-E4 [instructions] grouping = group entries by Added, Changed, Fixed, Removed
-E5 [instructions] attribution = credit each author by handle at the end of the line
-E6 [scope] target_file_globs = ["CHANGELOG.md"]
-E7 [scope] comparison_basis = last release tag in CHANGELOG.md
-E8 [output_format] shape = Markdown section appended to CHANGELOG.md under a new version heading
-E9 [output_format] done_when = every supplied PR appears exactly once under one of the four group headings
+To build a prompt for generating release notes from a list of merged pull requests, I'll need to ask you a few questions. 
 
-```xml
-<role>
-  <!-- E2.1 -->
-  Release notes writer.
-</role>
-<instructions>
-  <primary_task>
-    <!-- E3.1 -->
-    Generate release notes from a list of merged pull requests.
-  </primary_task>
-  <grouping>
-    <!-- E4.1 -->
-    Group entries under Added, Changed, Fixed, and Removed.
-  </grouping>
-  <attribution>
-    <!-- E5.1 -->
-    Credit each author by handle at the end of the line.
-  </attribution>
-</instructions>
-<scope>
-  <target_file_globs>
-    <!-- E6.1 -->
-    CHANGELOG.md
-  </target_file_globs>
-  <comparison_basis>
-    <!-- E7.1 -->
-    The last release tag recorded in CHANGELOG.md.
-  </comparison_basis>
-</scope>
-<output_format>
-  <!-- E8.1 -->
-  Markdown section appended to CHANGELOG.md under a new version heading.
-  <!-- E9.1 -->
-  Every supplied pull request appears exactly once under one of the four group headings.
-</output_format>
-```
+Here are your options for the first question:
 
-## Outcome digest
+1. **Git repository**: You want to generate release notes based on a specific Git repository.
+2. **Multiple repositories**: You want to generate release notes based on multiple Git repositories.
+3. **[Discovered]**: Let me try to discover the relevant repository or repositories from the initial prompt.
 
-**What it does**
-Turns a list of merged pull requests into a CHANGELOG.md section grouped by Added, Changed, Fixed, and Removed, with each author credited by handle.
-
-**Key inputs**
-The supplied list of merged PRs and the existing CHANGELOG.md with its last release tag.
-
-**Done when**
-Every supplied PR appears exactly once under one of the four group headings under a new version heading.
-
-**Quick sample**
-
-    ## 1.8.0 — 2026-04-20
-
-    ### Added
-    - Reflection pipeline for prompt optimization (#42 @JonEcho)
-
-    ### Fixed
-    - Ledger backfill dropped rows with empty content_id (#45 @alice)
-
-    ### Changed
-    - Validator now runs the 15-row audit before preview (#44 @bob)
+Which option best fits your needs?

@@ -1,1 +1,46 @@
-SKILL_INVOCATION_SKIPPED: budget
+### Outcome preview
+
+* **What it does**: This prompt generates an Agent Skill to refactor hardcoded timeouts and selectors in Samsung seller portal automation scripts, extracting them into config files.
+* **Key inputs**: Scripts in `packages/samsung-automation`, Playwright, shared utilities in `shared_utils`.
+* **Done when**: All hardcoded timeouts and selectors are extracted into config files without breaking existing tests.
+* **Quick sample**: The agent will create config files with extracted timeouts and selectors, e.g., `timeouts.json` and `selectors.json`.
+
+### Outcome digest
+
+## Outcome digest
+The generated prompt will create an Agent Skill that:
+1. Searches for hardcoded timeouts and selectors in Samsung seller portal automation scripts.
+2. Extracts them into config files (e.g., `timeouts.json` and `selectors.json`) using patterns from `shared_utils`.
+3. Ensures existing tests are not broken and follows the TDD approach and code rules.
+4. The agent will provide a report of the refactored code and config files.
+
+```xml
+<config_refactor>
+  <goal>Refactor hardcoded timeouts and selectors in Samsung seller portal automation scripts</goal>
+  <scope>
+    <local_roots>packages/samsung-automation</local_roots>
+    <target_file_globs>*.js</target_file_globs>
+    <comparison_basis>playwright</comparison_basis>
+    <completion_boundary>all hardcoded timeouts and selectors extracted</completion_boundary>
+  </scope>
+  <instructions>
+    <step>Search for hardcoded timeouts and selectors in scripts</step>
+    <step>Extract them into config files using shared_utils patterns</step>
+    <step>Ensure existing tests are not broken and follow TDD approach and code rules</step>
+  </instructions>
+  <constraints>
+    <constraint>Do not break existing tests</constraint>
+    <constraint>Follow TDD approach and code rules</constraint>
+  </constraints>
+  <illustrations>
+    <example>Extract timeouts into timeouts.json</example>
+    <example>Extract selectors into selectors.json</example>
+  </illustrations>
+</config_refactor>
+```
+Please confirm if this outcome meets your requirements. 
+
+**Ship this outcome profile** 
+**Refine with free text** 
+**Alternative: Focus on timeouts only** 
+**Alternative: Use a different config pattern**

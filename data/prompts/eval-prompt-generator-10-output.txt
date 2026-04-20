@@ -1,1 +1,1 @@
-SKILL_INVOCATION_SKIPPED: budget
+SKILL_INVOCATION_SKIPPED: claude runtime required (skill uses AskUserQuestion or another Claude-Code-specific feature)
