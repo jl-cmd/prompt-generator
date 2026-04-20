@@ -85,7 +85,9 @@ def build_reflection_prompt(failing_check: dict, skill_source: str) -> str:
         {skill_source}
 
         Propose the smallest edit to the skill source that would have made \
-        this check pass.
+        this check pass. If CURRENT SKILL SOURCE does not contain a line \
+        you can place verbatim on the `---` side of the diff, respond \
+        exactly `NO EDIT: <one-sentence description of the missing evidence>`.
     """)
 
 

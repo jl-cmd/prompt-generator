@@ -75,6 +75,22 @@ class TestExtractFailingChecks:
         assert only_failure["rule_id"] == "RULE_B"
 
 
+class TestBuildReflectionPromptReinforcesNoEditOption:
+    """User message restates the NO EDIT escape hatch close to the data."""
+
+    def test_should_mention_no_edit_option_in_user_message(self) -> None:
+        failing_check = {
+            "skill": "pmid",
+            "eval_id": 1,
+            "criterion": "crit",
+            "reason": "r",
+            "rule_id": None,
+            "offending_span": None,
+        }
+        prompt_text = build_reflection_prompt(failing_check, skill_source="body")
+        assert "NO EDIT" in prompt_text
+
+
 class TestBuildReflectionPrompt:
     """build_reflection_prompt produces a prompt referencing failure context."""
 

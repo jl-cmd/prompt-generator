@@ -43,6 +43,39 @@ class TestReflectionSystemPromptHardening:
         assert "don't " not in system_prompt_text
 
 
+class TestJudgeSystemPromptHardening:
+    """Judge prompt carries research-mode grounding and uses positive directives."""
+
+    def test_should_use_positive_directives_only(self) -> None:
+        judge_prompt_text = eval_runner.LLM_JUDGE_SYSTEM_PROMPT.lower()
+        assert "do not " not in judge_prompt_text
+        assert "don't " not in judge_prompt_text
+
+    def test_should_require_verbatim_quote_in_reason(self) -> None:
+        assert "verbatim" in eval_runner.LLM_JUDGE_SYSTEM_PROMPT.lower()
+
+    def test_should_require_pre_output_self_check(self) -> None:
+        judge_prompt_text = eval_runner.LLM_JUDGE_SYSTEM_PROMPT.lower()
+        assert "before emitting" in judge_prompt_text
+
+
+class TestReflectionPromptSpecificity:
+    """REFLECTION_SYSTEM_PROMPT uses concrete, example-anchored instructions."""
+
+    def test_should_tell_model_to_paste_identifiers_rather_than_copy_by_hand(self) -> None:
+        reflection_prompt_text = eval_runner.REFLECTION_SYSTEM_PROMPT
+        assert "by hand" not in reflection_prompt_text
+        assert "paste" in reflection_prompt_text.lower()
+
+    def test_should_show_concrete_diff_marker_example(self) -> None:
+        reflection_prompt_text = eval_runner.REFLECTION_SYSTEM_PROMPT
+        assert "Example of valid diff form" in reflection_prompt_text
+
+    def test_should_show_concrete_citation_format_example(self) -> None:
+        reflection_prompt_text = eval_runner.REFLECTION_SYSTEM_PROMPT
+        assert "Example of valid citations" in reflection_prompt_text
+
+
 class TestVerdictColorsInlined:
     """Color escape codes live inside VERDICT_COLORS, not as separate file-global constants."""
 
