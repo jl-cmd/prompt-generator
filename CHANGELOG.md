@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/jl-cmd/prompt-generator/compare/v1.6.0...v1.7.0) (2026-04-20)
+
+
+### Features
+
+* **pmax:** add incremental prompt-builder skill ([#37](https://github.com/jl-cmd/prompt-generator/issues/37)) ([43d6408](https://github.com/jl-cmd/prompt-generator/commit/43d6408b859dd6da57e41c7f0a68681a67ce3224))
+
 ## [1.6.0](https://github.com/jl-cmd/prompt-generator/compare/v1.5.1...v1.6.0) (2026-04-16)
 
 
