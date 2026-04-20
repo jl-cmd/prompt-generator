@@ -27,6 +27,7 @@ from dotenv import load_dotenv
 from config.eval_runner import (
     REFLECTION_MAX_TOKENS,
     REFLECTION_MODEL_DEFAULT,
+    REFLECTION_SYSTEM_PROMPT,
     REPORT_SEPARATOR_WIDTH,
 )
 
@@ -80,30 +81,11 @@ def build_reflection_prompt(failing_check: dict, skill_source: str) -> str:
 
 def call_reflection_lm(prompt_text: str, model_name: str) -> str:
     """Call the reflection LLM via LiteLLM and return its text response."""
-    reflection_system_prompt = textwrap.dedent("""\
-        You are a prompt-engineering diagnostic assistant. You read one \
-        failing eval check and the current skill source, then propose the \
-        SMALLEST possible edit to the skill source that would have made the \
-        check pass.
-
-        Respond in this exact shape:
-
-        DIAGNOSIS:
-        <one sentence naming the root cause>
-
-        PROPOSED EDIT:
-        <a unified-diff-style snippet showing the before and after of the \
-        smallest region of the skill source that needs to change; use --- \
-        and +++ markers>
-
-        RISK:
-        <one sentence noting what else this edit could affect>\
-    """)
     completion_payload = litellm.completion(
         model=model_name,
         max_tokens=REFLECTION_MAX_TOKENS,
         messages=[
-            {"role": "system", "content": reflection_system_prompt},
+            {"role": "system", "content": REFLECTION_SYSTEM_PROMPT},
             {"role": "user", "content": prompt_text},
         ],
     )

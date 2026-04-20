@@ -5,11 +5,14 @@ from pathlib import Path
 
 import pytest
 
+import reflect
 from reflect import (
     build_reflection_prompt,
     extract_failing_checks,
     load_report,
 )
+
+from config.eval_runner import REFLECTION_SYSTEM_PROMPT
 
 
 class TestLoadReport:
@@ -93,6 +96,26 @@ class TestBuildReflectionPrompt:
         assert "Missing Quick sample header" in prompt_text
         assert "REQUIRED_DIGEST_HEADERS" in prompt_text
         assert "SKILL content here" in prompt_text
+
+
+class TestReflectUsesHardenedSystemPrompt:
+    """reflect.py must send the anti-hallucination system prompt from config."""
+
+    def test_call_reflection_lm_should_send_hardened_system_prompt(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        captured_messages: list[dict] = []
+
+        def fake_completion(**kwargs: object) -> dict:
+            captured_messages.extend(kwargs["messages"])
+            return {"choices": [{"message": {"content": "ok"}}]}
+
+        monkeypatch.setattr(reflect.litellm, "completion", fake_completion)
+
+        reflect.call_reflection_lm("user prompt body", model_name="groq/test")
+
+        system_message = next(each for each in captured_messages if each["role"] == "system")
+        assert system_message["content"] == REFLECTION_SYSTEM_PROMPT
 
 
 if __name__ == "__main__":
