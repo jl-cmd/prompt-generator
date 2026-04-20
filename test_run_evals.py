@@ -1,13 +1,16 @@
 """Tests for run_evals.py structured failure reasons and JSON output mode."""
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
-from run_evals import CheckResult, EvalResult, eval_result_to_dict
+from config import eval_runner as eval_runner_module
+import run_evals as run_evals_module
+from run_evals import CheckResult, EvalResult, collect_all_results, eval_result_to_dict
 
 
 class TestCheckResultStructuredFields:
@@ -63,6 +66,34 @@ class TestEvalResultJsonSerialization:
         assert failing_check["offending_span"].startswith("**What it does**")
 
 
+class TestCollectAllResultsErrorHandling:
+    """collect_all_results must signal missing spec files, not silently skip them."""
+
+    def test_should_return_none_when_any_spec_file_is_missing(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        missing_spec_path = tmp_path / "does-not-exist.json"
+        monkeypatch.setattr(
+            eval_runner_module,
+            "EVAL_SPECS",
+            [("pmid", missing_spec_path, tmp_path)],
+        )
+        monkeypatch.setattr(
+            run_evals_module,
+            "EVAL_SPECS",
+            [("pmid", missing_spec_path, tmp_path)],
+        )
+
+        outcome = collect_all_results()
+
+        assert outcome is None
+
+
+@pytest.mark.skipif(
+    not os.environ.get("RUN_INTEGRATION_EVALS"),
+    reason="integration test: spawns run_evals.py which calls live LLM judges; "
+    "opt in with RUN_INTEGRATION_EVALS=1",
+)
 class TestRunEvalsJsonMode:
     """run_evals.py --json should emit machine-readable output to stdout."""
 

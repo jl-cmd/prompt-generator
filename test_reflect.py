@@ -118,5 +118,116 @@ class TestReflectUsesHardenedSystemPrompt:
         assert system_message["content"] == REFLECTION_SYSTEM_PROMPT
 
 
+class TestResolveSkillSourcePathRejectsTraversal:
+    """resolve_skill_source_path must reject skill names containing path separators."""
+
+    def test_should_raise_when_skill_contains_parent_directory_segment(self) -> None:
+        failing_check = {"skill": "../../etc/passwd"}
+        with pytest.raises(ValueError):
+            reflect.resolve_skill_source_path(failing_check, from_override=None)
+
+    def test_should_raise_when_skill_contains_forward_slash(self) -> None:
+        failing_check = {"skill": "pmid/evil"}
+        with pytest.raises(ValueError):
+            reflect.resolve_skill_source_path(failing_check, from_override=None)
+
+    def test_should_raise_when_skill_contains_backslash(self) -> None:
+        failing_check = {"skill": "pmid\\evil"}
+        with pytest.raises(ValueError):
+            reflect.resolve_skill_source_path(failing_check, from_override=None)
+
+    def test_should_allow_simple_skill_name(self) -> None:
+        failing_check = {"skill": "pmid"}
+        resolved = reflect.resolve_skill_source_path(failing_check, from_override=None)
+        assert resolved == Path("skills") / "pmid" / "SKILL.md"
+
+
+class TestReflectOnFailuresReportsErrors:
+    """reflect_on_failures must return a processed/errored tuple so main can signal."""
+
+    def test_should_count_reflection_call_errors(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        report_path = tmp_path / "report.json"
+        report_path.write_text(
+            json.dumps(
+                {
+                    "evals": [
+                        {
+                            "skill": "pmid",
+                            "eval_id": 1,
+                            "eval_name": "n",
+                            "checks": [
+                                {
+                                    "criterion": "c",
+                                    "verdict": "FAIL",
+                                    "reason": "r",
+                                    "rule_id": None,
+                                    "offending_span": None,
+                                }
+                            ],
+                        }
+                    ]
+                }
+            ),
+            encoding="utf-8",
+        )
+        skill_source = tmp_path / "SKILL.md"
+        skill_source.write_text("skill source body", encoding="utf-8")
+
+        def always_fail(prompt_text: str, model_name: str) -> str:
+            raise RuntimeError("boom")
+
+        monkeypatch.setattr(reflect, "call_reflection_lm", always_fail)
+
+        outcome = reflect.reflect_on_failures(
+            report_path=report_path, skill_path_override=skill_source
+        )
+
+        assert outcome.total_failures == 1
+        assert outcome.errored_count == 1
+
+    def test_main_should_return_nonzero_when_every_reflection_errors(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        report_path = tmp_path / "report.json"
+        report_path.write_text(
+            json.dumps(
+                {
+                    "evals": [
+                        {
+                            "skill": "pmid",
+                            "eval_id": 1,
+                            "eval_name": "n",
+                            "checks": [
+                                {
+                                    "criterion": "c",
+                                    "verdict": "FAIL",
+                                    "reason": "r",
+                                    "rule_id": None,
+                                    "offending_span": None,
+                                }
+                            ],
+                        }
+                    ]
+                }
+            ),
+            encoding="utf-8",
+        )
+        skill_source = tmp_path / "SKILL.md"
+        skill_source.write_text("x", encoding="utf-8")
+
+        def always_fail(prompt_text: str, model_name: str) -> str:
+            raise RuntimeError("boom")
+
+        monkeypatch.setattr(reflect, "call_reflection_lm", always_fail)
+
+        exit_code = reflect.main(
+            [str(report_path), "--skill-path", str(skill_source)]
+        )
+
+        assert exit_code != 0
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

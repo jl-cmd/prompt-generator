@@ -18,6 +18,7 @@ import json
 import os
 import sys
 import textwrap
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
@@ -25,11 +26,20 @@ import litellm
 from dotenv import load_dotenv
 
 from config.eval_runner import (
+    REFLECTION_CRITERION_PREVIEW_WIDTH,
     REFLECTION_MAX_TOKENS,
     REFLECTION_MODEL_DEFAULT,
     REFLECTION_SYSTEM_PROMPT,
     REPORT_SEPARATOR_WIDTH,
 )
+
+
+@dataclass
+class ReflectionRunOutcome:
+    """Summary of a reflect_on_failures run: how many failures were processed vs errored."""
+
+    total_failures: int
+    errored_count: int
 
 load_dotenv()
 
@@ -95,26 +105,42 @@ def call_reflection_lm(prompt_text: str, model_name: str) -> str:
 def resolve_skill_source_path(
     failing_check: dict, from_override: Optional[Path]
 ) -> Path:
-    """Resolve which skill source file to feed into the reflection prompt."""
+    """Resolve which skill source file to feed into the reflection prompt.
+
+    Rejects skill names containing path separators or parent-directory segments
+    so a hostile JSON report cannot traverse outside the ``skills/`` directory.
+    """
     if from_override is not None:
         return from_override
-    return Path("skills") / failing_check["skill"] / "SKILL.md"
+    skill_name = failing_check["skill"]
+    if "/" in skill_name or "\\" in skill_name or ".." in skill_name.split("/") or skill_name in ("", ".", ".."):
+        raise ValueError(
+            f"Refusing to resolve skill source path for unsafe skill name: {skill_name!r}"
+        )
+    return Path("skills") / skill_name / "SKILL.md"
 
 
 def reflect_on_failures(
     report_path: Path,
     skill_path_override: Optional[Path] = None,
     model_name: str = REFLECTION_MODEL_DEFAULT,
-) -> int:
-    """Run reflection on every failure in the report. Return count of failures processed."""
+) -> ReflectionRunOutcome:
+    """Run reflection on every failure in the report.
+
+    Returns a :class:`ReflectionRunOutcome` with the total number of failing
+    checks found and how many of those raised during the reflection call, so
+    the CLI entry point can surface a non-zero exit code when every call
+    failed (rate limits, auth, network outage) rather than silently succeeding.
+    """
     report_payload = load_report(report_path)
     all_failures = extract_failing_checks(report_payload)
 
     if not all_failures:
         print("No failing checks found in report. Nothing to reflect on.")
-        return 0
+        return ReflectionRunOutcome(total_failures=0, errored_count=0)
 
     separator_line = "=" * REPORT_SEPARATOR_WIDTH
+    errored_count = 0
     for each_index, each_failure in enumerate(all_failures, start=1):
         skill_source_path = resolve_skill_source_path(each_failure, skill_path_override)
         if not skill_source_path.exists():
@@ -123,16 +149,18 @@ def reflect_on_failures(
                 f"skipping failure {each_index}",
                 file=sys.stderr,
             )
+            errored_count += 1
             continue
 
         skill_source_text = skill_source_path.read_text(encoding="utf-8")
         prompt_text = build_reflection_prompt(each_failure, skill_source_text)
 
+        criterion_preview = each_failure["criterion"][:REFLECTION_CRITERION_PREVIEW_WIDTH]
         print(f"\n{separator_line}")
         print(
             f"Failure {each_index}/{len(all_failures)}: "
             f"[{each_failure['skill']}] eval {each_failure['eval_id']} — "
-            f"{each_failure['criterion'][:60]}"
+            f"{criterion_preview}"
         )
         print(separator_line)
 
@@ -140,11 +168,14 @@ def reflect_on_failures(
             reflection_text = call_reflection_lm(prompt_text, model_name)
         except Exception as each_error:
             print(f"Reflection call failed: {each_error}", file=sys.stderr)
+            errored_count += 1
             continue
 
         print(reflection_text)
 
-    return len(all_failures)
+    return ReflectionRunOutcome(
+        total_failures=len(all_failures), errored_count=errored_count
+    )
 
 
 def parse_command_line(argv: list[str]) -> argparse.Namespace:
@@ -173,13 +204,26 @@ def parse_command_line(argv: list[str]) -> argparse.Namespace:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
-    """Entry point: parse args and run reflection."""
+    """Entry point: parse args and run reflection.
+
+    Returns 0 when every failure was reflected on without error. Returns 1
+    when any reflection call or skill-source lookup failed, so CI callers
+    can distinguish a clean run from one where the underlying LLM rejected
+    every request (auth error, rate limit, network outage).
+    """
     arguments = parse_command_line(argv if argv is not None else sys.argv[1:])
-    reflect_on_failures(
+    outcome = reflect_on_failures(
         report_path=arguments.report_path,
         skill_path_override=arguments.skill_path,
         model_name=arguments.model,
     )
+    if outcome.errored_count > 0:
+        print(
+            f"ERROR: {outcome.errored_count}/{outcome.total_failures} "
+            f"reflections failed; see stderr for details.",
+            file=sys.stderr,
+        )
+        return 1
     return 0
 
 

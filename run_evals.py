@@ -650,13 +650,18 @@ def build_json_report(all_results: list[EvalResult]) -> dict:
     }
 
 
-def collect_all_results() -> list[EvalResult]:
-    """Run every configured eval and return the full list of results."""
+def collect_all_results() -> Optional[list[EvalResult]]:
+    """Run every configured eval and return the full list of results.
+
+    Returns ``None`` when any configured spec file is missing, matching the
+    abort-on-missing-spec behavior of the text-mode branch so ``--json``
+    consumers never receive a silently-truncated report.
+    """
     all_results: list[EvalResult] = []
     for skill, spec_path, output_dir in EVAL_SPECS:
         if not spec_path.exists():
             print(f"ERROR: Eval spec not found: {spec_path}", file=sys.stderr)
-            continue
+            return None
         spec = load_eval_spec(spec_path)
         for eval_spec in spec["evals"]:
             each_outcome = run_eval(skill, eval_spec, output_dir)
@@ -675,10 +680,12 @@ def main() -> int:
     is_json_mode = "--json" in sys.argv[1:]
 
     if is_json_mode:
-        all_results = collect_all_results()
-        report_payload = build_json_report(all_results)
+        collected_results = collect_all_results()
+        if collected_results is None:
+            return 1
+        report_payload = build_json_report(collected_results)
         print(json.dumps(report_payload, indent=JSON_REPORT_INDENT))
-        has_failures = any(not each_outcome.passed for each_outcome in all_results)
+        has_failures = any(not each_outcome.passed for each_outcome in collected_results)
         return 1 if has_failures else 0
 
     all_results = []
