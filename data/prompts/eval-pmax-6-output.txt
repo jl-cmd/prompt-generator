@@ -1,37 +1,20 @@
-E1 [prompt_type] user-task
-E2 [role] refactoring assistant
-E3 [instructions] primary task = rename calc_total to compute_cart_total in every file where it appears
-E4 [scope] target_file_globs = ["**/*.py", "**/*.md"]
+To proceed with the prompt for renaming `calc_total` to `compute_cart_total` across the codebase, I have a few questions to clarify the scope of this task.
 
-```xml
-<role>
-  <!-- E2.1 -->
-  Refactoring assistant.
-</role>
-<instructions>
-  <!-- E3.1 -->
-  Rename calc_total to compute_cart_total in every file where it appears.
-</instructions>
-<scope>
-  <target_file_globs>
-    <!-- E4.1 -->
-    **/*.py and **/*.md
-  </target_file_globs>
-</scope>
-```
+Please choose the best option for each of the following:
 
-## Outcome digest
+1. What programming language is primarily used in your codebase?
+   - Python
+   - JavaScript
+   - Java
+   - Other (please specify)
 
-**What it does**
-Renames calc_total to compute_cart_total across every .py and .md file in the repository.
+2. What type of files should be included in the renaming process? 
+   - Only Python files (.py)
+   - All text files (.txt, .py, .js, etc.)
+   - Specific file extensions (please specify)
 
-**Key inputs**
-Every Python and Markdown file under the repo root.
+3. Should the renaming process include comments and string literals?
+   - Yes, include comments and string literals
+   - No, exclude comments and string literals
 
-**Done when**
-No occurrence of calc_total remains in any .py or .md file.
-
-**Quick sample**
-
-    - def calc_total(items):
-    + def compute_cart_total(items):
+Your input will help me create an accurate prompt for renaming `calc_total` to `compute_cart_total`.

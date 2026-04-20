@@ -1,1 +1,12 @@
-SKILL_INVOCATION_SKIPPED: budget
+### Outcome preview
+To create a prompt for an agent that refactors the Samsung theme scoring pipeline, I'll need to make a few assumptions. Here's a possible approach:
+* Investigate the codebase to identify where the scoring logic is implemented
+* Refactor the scoring logic to improve maintainability, readability, and performance
+* Ensure the refactored code is consistent with the existing codebase and follows best practices
+
+Please confirm or modify the following:
+1. **Ship this outcome profile**: Refactor the Samsung theme scoring pipeline with a focus on improving code quality and performance.
+2. **Investigate and refactor theme_scorer.py only**: Focus on refactoring the scoring logic in theme_scorer.py, assuming it contains the primary logic.
+3. **Refine with free text**: Provide additional context or clarify the location of the scoring logic.
+
+Please select one of the options above.

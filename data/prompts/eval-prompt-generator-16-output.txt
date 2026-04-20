@@ -1,1 +1,20 @@
-SKILL_INVOCATION_SKIPPED: budget
+### Outcome preview
+
+To refine your code review prompt, I will:
+* Incorporate the missing CODE_RULES.md sections into a `<code_quality>` section
+* Demote the rules file to an abbreviated pointer
+* Ensure the prompt is structured and easy to follow
+
+Here is a preview of the refined prompt:
+* The `<code_quality>` section will include the missing CODE_RULES.md sections
+* The rules file will be referenced as a pointer, allowing for easy access to the full rules
+* The prompt will be designed to be clear and concise, making it easy to understand and follow
+
+### AskUserQuestion
+
+Do you want to:
+1. **Ship this outcome profile**: Refine the code review prompt as described above
+2. **Use a different code quality framework**: Replace the CODE_RULES.md sections with a different framework
+3. **Refine with free text**: Provide additional details or changes to the refined prompt 
+
+Please select one of the options above.

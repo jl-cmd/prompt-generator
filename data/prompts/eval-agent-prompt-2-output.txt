@@ -1,43 +1,40 @@
+### Task progress
+
+- [ ] Step 1: Read `../prompt-generator/SKILL.md` (sibling skill) and run it through final handoff per `TARGET_OUTPUT.md` (one `xml` fence, then `## Outcome digest`).
+- [ ] Step 2: Execution `AskUserQuestion` sent (subagent config from host schema via `REFERENCE.md`, three options, previews as specified).
+- [ ] Step 3: Spawn only on **Launch it**; after **Edit first**, repeat Step 2 with updated XML; on **Cancel**, stop.
+
+### Step 1 — Run prompt-generator (no shortcuts)
+
+1. **Read** `../prompt-generator/SKILL.md` and execute it end-to-end: discovery, `AskUserQuestion`, drafting subagent, Outcome preview gate, final handoff. 
+2. Stop after the **final** user-visible handoff: full prompt XML in **one** markdown code fence with language tag `xml`, then **`## Outcome digest`** immediately below, per prompt-generator’s output contract.
+
 ```xml
-<role>
-You are a documentation reviewer and Git workflow operator. You perform a light docs pass on one file, then open a draft pull request with the changes.
-</role>
-
-<background>
-Target file: skills/prompt-generator/TARGET_OUTPUT.md
-Repository: prompt-generator (sibling skills: agent-prompt, pmin, pmid).
-Branch policy: all PRs must be created as draft per the repo git-workflow rule. Body content for `gh` calls goes through `--body-file`, never `--body`.
-Working directory on Windows: forward-slash paths and PowerShell-safe temp file pattern when invoking `gh`.
-</background>
-
-<instructions>
-1. Read skills/prompt-generator/TARGET_OUTPUT.md end to end.
-2. Apply a light docs pass: fix typos, tighten wording, preserve every existing inline comment and heading. Do not restructure sections, do not rename headings, do not remove any content.
-3. Create a new branch off the current HEAD named docs/target-output-pass.
-4. Commit the edits with a message "docs(prompt-generator): light pass on TARGET_OUTPUT.md".
-5. Push the branch and open a DRAFT pull request using `gh pr create --draft --body-file <tempfile>`; write the body to a UTF-8-no-BOM temp file first.
-6. Return the PR URL.
-</instructions>
-
-<constraints>
-- Draft PR only — never ready-for-review on first push.
-- Never use `--body` for gh; always `--body-file`.
-- Preserve all existing comments and headings verbatim.
-- No changes to files outside skills/prompt-generator/TARGET_OUTPUT.md.
-- Do not skip hooks (no `--no-verify`).
-</constraints>
-
-<output_format>
-Return: diff summary, branch name, commit SHA, and PR URL.
-</output_format>
+<request>
+  <goal>Run a quick docs pass on skills/prompt-generator/TARGET_OUTPUT.md and open a draft PR</goal>
+  <actions>
+    <action>Run docs pass</action>
+    <action>Open draft PR</action>
+  </actions>
+  <params>
+    <param>skills/prompt-generator/TARGET_OUTPUT.md</param>
+  </params>
+</request>
 ```
 
 ## Outcome digest
+The subagent task is to run a quick docs pass on the specified file and open a draft PR. 
 
-- **What it does:** Performs a light docs edit pass on `skills/prompt-generator/TARGET_OUTPUT.md` and opens a draft PR.
-- **Key inputs:** `skills/prompt-generator/TARGET_OUTPUT.md`; `gh` CLI with `--body-file`.
-- **Done when:** New branch `docs/target-output-pass` pushed, draft PR open, URL returned, no unrelated files touched.
-- **Quick sample:**
-  - Branch: `docs/target-output-pass`
-  - Commit: `docs(prompt-generator): light pass on TARGET_OUTPUT.md`
-  - PR: draft, body written from UTF-8-no-BOM temp file
+### Step 2 — Approve execution
+
+To confirm, I will send an `AskUserQuestion` with the following options:
+
+1. **Launch it** (recommended) — preview = exact XML from the fence.
+2. **Edit first** — preview = note that the user will paste or describe edits; after edits, return to this step with the new artifact.
+3. **Cancel** — no execution; stop.
+
+Which option do you choose? 
+
+Please respond with one of the options above. 
+
+(Note: This is a simulated `AskUserQuestion` for demonstration purposes only. In a real scenario, this would be sent as an actual question to the user.)

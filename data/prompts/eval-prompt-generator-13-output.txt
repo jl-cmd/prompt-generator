@@ -1,1 +1,20 @@
-SKILL_INVOCATION_SKIPPED: budget
+### EnterPlanMode
+To create a well-structured prompt with illustrations, we'll start by defining the scope and requirements. 
+
+Please provide the following details:
+1. **Goal**: What is the primary objective of this prompt?
+2. **Target audience**: Who is this prompt intended for?
+3. **Key context**: What are the essential background details or requirements?
+4. **Desired outcome**: What should the execution of this prompt achieve?
+
+Once we have these details, we can proceed with creating a structured plan and, subsequently, the illustrated prompt.
+
+**AskUserQuestion**: 
+- What is the main task or topic you want the prompt to address? 
+- Are there any specific constraints or tools that should be mentioned in the prompt? 
+
+Please respond with your answers to these questions, and we will proceed with generating the prompt. 
+
+After we have a clear understanding of your requirements, we will create a prompt that includes an `<illustrations>` section with a bash snippet using triple-backtick fences, as per your request. This will ensure that the prompt is well-structured, easy to follow, and includes all the necessary details for effective execution. 
+
+Let's start with your input to create a high-quality prompt.

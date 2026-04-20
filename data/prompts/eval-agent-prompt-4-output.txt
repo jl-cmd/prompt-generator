@@ -1,45 +1,16 @@
-Routing note: user invoked `/prompt-generator`, not `/agent-prompt`, and explicitly requested "handoff XML ... no subagent execution." Per skills/agent-prompt/SKILL.md section "If the user only needed the artifact," agent-prompt stops and the prompt-generator skill handles the request without the post-handoff execution AskUserQuestion and without any background spawn.
-
-Following skills/prompt-generator/SKILL.md:
+### Step 1: Run prompt-generator
 
 ```xml
-<role>
-You are a continuation agent taking over a hooks-refactoring session with zero access to the prior chat. Everything you need is in this XML.
-</role>
-
-<background>
-Scope: hooks only. Refactor target directories are packages/claude-dev-env/hooks/ and any sibling hook packages the repo exposes.
-Goal: continue an in-progress refactor that tightens shared hook utilities, removes magic literals, and consolidates exit-code messaging without changing public hook behavior.
-Known constraints: hooks must preserve current exit codes and stdout/stderr contracts; tests under each hook package must stay green.
-Out of scope: skills, agents, docs, config outside hook packages.
-</background>
-
-<instructions>
-1. Enumerate every file under packages/claude-dev-env/hooks/ and list which ones share helper logic (exit formatting, argv parsing, path normalization).
-2. Pick the single highest-leverage helper to consolidate. Write its target home (config/ or a shared utility module) and the exact public signature.
-3. For each consumer hook, plan the minimal edit: import the shared helper, delete the duplicated local definition, keep behavior identical.
-4. Work one hook at a time: add/adjust tests first (Red), apply the edit (Green), run the hook's test file, commit.
-5. Stop after three consumer hooks are migrated or when the next migration would require a behavior change; whichever comes first.
-</instructions>
-
-<constraints>
-- No behavior changes to any hook's exit codes, stdout, or stderr.
-- No new inline comments. Preserve all existing comments.
-- Constants live in config/; no module-level UPPER_SNAKE outside config/ in production code.
-- Do not push and do not open a PR.
-</constraints>
-
-<output_format>
-Return: helper chosen, its signature, list of consumer hooks migrated with commit SHAs, and any blocker you deferred.
-</output_format>
+<handoff>
+  <goal>refactor hooks</goal>
+  <task>continue refactoring</task>
+  <context>new session</context>
+  <payload>
+    <!-- no execution payload needed -->
+  </payload>
+</handoff>
 ```
 
 ## Outcome digest
 
-- **What it does:** Handoff XML for a new session to continue a hooks-only refactor with zero prior chat access.
-- **Key inputs:** `packages/claude-dev-env/hooks/` tree; existing hook tests.
-- **Done when:** One shared helper chosen, up to three consumer hooks migrated with tests green, commits on the current branch.
-- **Quick sample:**
-  - Scope lock: hooks only
-  - Stop condition: three hooks migrated or next step requires behavior change
-  - No execution spawn; artifact-only per user request
+The provided XML handoff artifact is designed to continue refactoring hooks in a new session, without the need for subagent execution. This artifact can be used as-is in the new session to continue the refactoring work. No further processing is required.

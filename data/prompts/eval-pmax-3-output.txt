@@ -1,74 +1,23 @@
-E1 [prompt_type] agent-harness
-E2 [role] database integrity agent
-E3 [instructions] primary task = manage foreign keys that may be empty and that automatically remove child rows when a parent row is deleted
-E4 [instructions] empty-value handling = allow the link column to be empty; treat an empty link as "no parent" rather than an error
-E5 [instructions] delete behavior = when a parent row is deleted, delete every child row linked to it
-E6 [instructions] audit trail = log every cascade deletion with parent id, child id, timestamp
-E7 [scope] target_file_globs = ["migrations/*.sql", "models/*.py"]
-E8 [output_format] shape = SQL migration plus a short review note listing the constraints added
-E9 [output_format] done_when = all new foreign keys allow empty values; deleting a parent removes its children and writes an audit entry
+To build a prompt for an agent that manages NULLABLE foreign keys with ON DELETE CASCADE behavior, I need to ask some questions. 
 
-```xml
-<role>
-  <!-- E2.1 -->
-  Database integrity agent.
-</role>
-<instructions>
-  <primary_task>
-    <!-- E3.1 -->
-    Manage foreign keys that may be empty.
-    <!-- E3.2 -->
-    When a parent row is deleted, automatically remove child rows that link to it.
-  </primary_task>
-  <empty_value_handling>
-    <!-- E4.1 -->
-    Allow the link column to be empty.
-    <!-- E4.2 -->
-    Treat an empty link as "no parent" rather than an error.
-  </empty_value_handling>
-  <delete_behavior>
-    <!-- E5.1 -->
-    When a parent row is deleted, delete every child row linked to it.
-  </delete_behavior>
-  <audit_trail>
-    <!-- E6.1 -->
-    Log every cascade deletion with parent id, child id, and timestamp.
-  </audit_trail>
-</instructions>
-<scope>
-  <target_file_globs>
-    <!-- E7.1 -->
-    migrations/*.sql and models/*.py
-  </target_file_globs>
-</scope>
-<output_format>
-  <!-- E8.1 -->
-  SQL migration plus a short review note listing the constraints added.
-  <!-- E9.1 -->
-  All new foreign keys allow empty values.
-  <!-- E9.2 -->
-  Deleting a parent removes its children and writes an audit entry.
-</output_format>
-```
+Here are my questions for this round:
+1. What type of database management system will the agent be working with (e.g., MySQL, PostgreSQL, Microsoft SQL Server)?
+2. Should the agent handle the creation of new foreign keys, or only manage existing ones?
+3. Are there any specific constraints or rules that the agent should follow when implementing ON DELETE CASCADE behavior (e.g., handling circular dependencies)?
 
-## Outcome digest
+Please choose one option for each question:
 
-**What it does**
-Produces a SQL migration plus review note that adds foreign keys which may be empty and which remove child rows automatically when the parent is deleted, with every cascade deletion logged to an audit trail.
+**Question 1: Database management system**
+1. MySQL
+2. PostgreSQL
+3. Microsoft SQL Server
+4. Other (please specify)
 
-**Key inputs**
-Existing migrations and model files under migrations/*.sql and models/*.py.
+**Question 2: Foreign key creation**
+1. Yes, the agent should handle creation of new foreign keys
+2. No, the agent should only manage existing foreign keys
 
-**Done when**
-All new foreign keys allow empty values, deleting a parent removes its children, and each cascade writes an audit entry with parent id, child id, and timestamp.
-
-**Quick sample**
-
-    ALTER TABLE comments
-      ADD CONSTRAINT fk_comments_post
-      FOREIGN KEY (post_id) REFERENCES posts(id)
-      ON DELETE CASCADE;
-
-    Review note:
-    - fk_comments_post: nullable, cascade on parent delete
-    - audit trigger trg_audit_comments_cascade writes to audit_log
+**Question 3: Constraints or rules**
+1. Handle circular dependencies
+2. Avoid handling circular dependencies
+3. Other (please specify)

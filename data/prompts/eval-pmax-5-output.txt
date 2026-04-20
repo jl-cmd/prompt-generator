@@ -1,73 +1,13 @@
-E1 [prompt_type] user-task
-E2 [role] backend API engineer
-E3 [instructions] primary task = add a new API endpoint that returns the current user's preferences
-E4 [instructions] route = GET /api/v1/users/me/preferences
-E5 [instructions] auth = require an authenticated session; reject unauthenticated requests with 401
-E6 [instructions] response shape = JSON object keyed by preference name with scalar values
-E7 [scope] target_file_globs = ["api/routes/*.py", "api/models/preferences.py", "tests/api/test_preferences.py"]
-E8 [output_format] shape = route handler, request schema, response schema, and one integration test
-E9 [output_format] done_when = integration test passes for an authenticated user and returns 401 for an unauthenticated request
+To build a prompt for adding a new API endpoint that returns user preferences, I need to ask a few questions. Please choose the best option for each question.
 
-```xml
-<role>
-  <!-- E2.1 -->
-  Backend API engineer.
-</role>
-<instructions>
-  <primary_task>
-    <!-- E3.1 -->
-    Add a new API endpoint that returns the current user's preferences.
-  </primary_task>
-  <route>
-    <!-- E4.1 -->
-    GET /api/v1/users/me/preferences.
-  </route>
-  <auth>
-    <!-- E5.1 -->
-    Require an authenticated session.
-    <!-- E5.2 -->
-    Reject unauthenticated requests with status 401.
-  </auth>
-  <response_shape>
-    <!-- E6.1 -->
-    JSON object keyed by preference name with scalar values.
-  </response_shape>
-</instructions>
-<scope>
-  <target_file_globs>
-    <!-- E7.1 -->
-    api/routes/*.py, api/models/preferences.py, and tests/api/test_preferences.py
-  </target_file_globs>
-</scope>
-<output_format>
-  <!-- E8.1 -->
-  Route handler, request schema, response schema, and one integration test.
-  <!-- E9.1 -->
-  Integration test passes for an authenticated user.
-  <!-- E9.2 -->
-  Returns 401 for an unauthenticated request.
-</output_format>
-```
+What type of API endpoint are you trying to add?
+A) **RESTful API endpoint** ([discovered] most common choice): A standard HTTP endpoint that returns data in a structured format, such as JSON.
+B) **GraphQL API endpoint**: A query-based endpoint that allows clients to specify exactly what data they need.
+C) **gRPC API endpoint**: A high-performance endpoint that uses protocol buffers to define the service interface.
 
-## Outcome digest
+Which of the following best describes the user preferences you want to return?
+A) **Simple key-value pairs** (e.g., username, language, timezone): Straightforward preferences with a single value.
+B) **Nested preferences** (e.g., notification settings with multiple options): Preferences with multiple nested values or structures.
+C) **Complex preferences** (e.g., preferences with conditional logic or multiple dependencies): Preferences that require additional processing or evaluation.
 
-**What it does**
-Adds a GET /api/v1/users/me/preferences endpoint that returns the authenticated user's preferences as a flat JSON object, rejecting unauthenticated requests with 401.
-
-**Key inputs**
-Existing route, model, and test files under api/routes/, api/models/preferences.py, and tests/api/test_preferences.py.
-
-**Done when**
-The integration test passes for an authenticated user and returns 401 for an unauthenticated request.
-
-**Quick sample**
-
-    GET /api/v1/users/me/preferences
-    Authorization: Bearer <token>
-
-    200 OK
-    {
-      "theme": "dark",
-      "notifications_email": true,
-      "timezone": "America/New_York"
-    }
+Please select one option for each question. I will use your choices to build the prompt.

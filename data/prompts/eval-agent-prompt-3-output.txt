@@ -1,41 +1,100 @@
+- [ ] Step 1: Read `../prompt-generator/SKILL.md` (sibling skill) and run it through final handoff per `TARGET_OUTPUT.md` (one `xml` fence, then `## Outcome digest`).
+- [ ] Step 2: Execution `AskUserQuestion` sent (subagent config from host schema via `REFERENCE.md`, three options, previews as specified).
+- [ ] Step 3: Spawn only on **Launch it**; after **Edit first**, repeat Step 2 with updated XML; on **Cancel**, stop.
+
+### Step 1 — Run prompt-generator (no shortcuts)
+
+1. **Read** `../prompt-generator/SKILL.md` and execute it end-to-end: discovery, `AskUserQuestion`, drafting subagent, Outcome preview gate, final handoff. **Read** `../prompt-generator/REFERENCE.md` only when that workflow or the drafting agent requires rubric or template detail.
+2. Stop after the **final** user-visible handoff: full prompt XML in **one** markdown code fence with language tag `xml`, then **`## Outcome digest`** immediately below, per prompt-generator’s output contract.
+3. Keep draft, refinement, file validation, and preview rounds **inside** prompt-generator only—do not add a parallel refinement pipeline in this skill.
+
 ```xml
-<role>
-You are a continuation agent picking up work on the agent-prompt skill with zero access to the prior chat. Everything you need is in this XML.
-</role>
-
-<background>
-Target file: skills/agent-prompt/SKILL.md
-Skill purpose: Orchestrates prompt-generator to produce a paste-ready XML handoff, gates execution on one AskUserQuestion, then spawns a background subagent whose prompt is the approved XML verbatim.
-Current state: SKILL.md defines three workflow steps and references ../prompt-generator/SKILL.md plus REFERENCE.md for host tool enum mapping. Evals live at skills/agent-prompt/evals/agent-prompt.json (6 scenarios).
-Open work: tighten the Step 2 AskUserQuestion description, ensure the Edit first path explicitly returns to Step 2, and confirm kebab-case name guidance is present.
-</background>
-
-<instructions>
-1. Read skills/agent-prompt/SKILL.md in full.
-2. Read skills/agent-prompt/REFERENCE.md for host tool enum guidance.
-3. Identify any gap against the six eval expectations in skills/agent-prompt/evals/agent-prompt.json (happy path, safety, edit-first loop, wrong-skill routing, trivial inline, slash-argument-as-goal).
-4. Propose minimal edits to SKILL.md that close each gap without expanding scope. Keep the three-step structure intact.
-5. Apply the edits, then run any local validator the repo exposes for skill markdown.
-6. Commit to the current branch with message "docs(agent-prompt): tighten Step 2 approval guidance".
-</instructions>
-
-<constraints>
-- Preserve all existing comments and heading text.
-- Do not alter REFERENCE.md or TARGET_OUTPUT.md.
-- No new inline comments in any code touched.
-- Do not push and do not open a PR; commit only.
-</constraints>
-
-<output_format>
-Return: diff of SKILL.md, mapping of each eval row to the edit that addresses it, and the commit SHA.
-</output_format>
+<agent-prompt>
+    <goal>continue work on skills/agent-prompt/SKILL.md</goal>
+    <steps>
+        <step>Review SKILL.md for clarity and accuracy</step>
+        <step>Update SKILL.md based on review findings</step>
+    </steps>
+    <guardrails>
+        <guardrail>Keep changes minimal and focused</guardrail>
+        <guardrail>Test changes before finalizing</guardrail>
+        <guardrail>Optional guardrail: Consider including a note about handling risk</guardrail>
+    </guardrails>
+</agent-prompt>
 ```
 
 ## Outcome digest
+Continue work on skills/agent-prompt/SKILL.md with a focus on clarity, accuracy, and minimal changes. 
 
-- **What it does:** Tightens `skills/agent-prompt/SKILL.md` against the six eval expectations without restructuring the three-step workflow.
-- **Key inputs:** `skills/agent-prompt/SKILL.md`, `skills/agent-prompt/REFERENCE.md`, `skills/agent-prompt/evals/agent-prompt.json`.
-- **Done when:** Edits applied, every eval row has a corresponding SKILL.md line, one commit on the current branch.
-- **Quick sample:**
-  - Mapping: eval id 1 -> Step 2 question text; eval id 3 -> Edit-first return clause; eval id 5 -> When-to-stay-inline bullet
-  - Commit: `docs(agent-prompt): tighten Step 2 approval guidance`
+### Step 2 — Approve execution
+
+Use **one** `AskUserQuestion` after the prompt-generator handoff. Include in the question text:
+
+- Proposed **subagent** configuration: map task to **host** `subagent_type` and `mode` using **`REFERENCE.md` § Subagent type** (confirm enums against the live tool descriptor).
+- **Kebab-case** `name` (3–5 words) for follow-up where the host supports it (e.g. `SendMessage({to: name})`).
+- That **`prompt` will be the finalized XML** (verbatim as approved), except after **Edit first** when the user replaces it.
+
+You have chosen to edit the proposed XML handoff before proceeding. Here is the current XML:
+```xml
+<agent-prompt>
+    <goal>continue work on skills/agent-prompt/SKILL.md</goal>
+    <steps>
+        <step>Review SKILL.md for clarity and accuracy</step>
+        <step>Update SKILL.md based on review findings</step>
+    </steps>
+    <guardrails>
+        <guardrail>Keep changes minimal and focused</guardrail>
+        <guardrail>Test changes before finalizing</guardrail>
+        <guardrail>Optional guardrail: Consider including a note about handling risk</guardrail>
+    </guardrails>
+</agent-prompt>
+```
+
+Please edit this XML by describing your requested changes. Then I will show you the updated XML and ask for your approval to proceed.
+
+
+You said: Edit first — remove the optional guardrail bullet from the XML.
+
+Here is the updated XML:
+```xml
+<agent-prompt>
+    <goal>continue work on skills/agent-prompt/SKILL.md</goal>
+    <steps>
+        <step>Review SKILL.md for clarity and accuracy</step>
+        <step>Update SKILL.md based on review findings</step>
+    </steps>
+    <guardrails>
+        <guardrail>Keep changes minimal and focused</guardrail>
+        <guardrail>Test changes before finalizing</guardrail>
+    </guardrails>
+</agent-prompt>
+```
+
+## Outcome digest
+Continue work on skills/agent-prompt/SKILL.md with a focus on clarity, accuracy, and minimal changes.
+
+Now, you have three options to proceed:
+1. **Launch it** — run the updated XML as a subagent task.
+2. **Edit first** — make further changes to the XML.
+3. **Cancel** — stop this task.
+
+You said: Launch it.
+
+Using the updated XML as the execution payload:
+```xml
+<agent-prompt>
+    <goal>continue work on skills/agent-prompt/SKILL.md</goal>
+    <steps>
+        <step>Review SKILL.md for clarity and accuracy</step>
+        <step>Update SKILL.md based on review findings</step>
+    </steps>
+    <guardrails>
+        <guardrail>Keep changes minimal and focused</guardrail>
+        <guardrail>Test changes before finalizing</guardrail>
+    </guardrails>
+</agent-prompt>
+```
+
+The subagent will run with `run_in_background: true`, using the host-valid `subagent_type` and `mode` as specified, and the provided XML as the `prompt`. 
+
+This task will now execute in the background.
