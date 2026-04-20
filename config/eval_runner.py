@@ -93,6 +93,10 @@ LLM_JUDGE_MAX_TOKENS: int = 256
 LLM_JUDGE_OUTPUT_CHAR_LIMIT: int = 4000
 REPORT_SEPARATOR_WIDTH: int = 70
 
+REFLECTION_MODEL_DEFAULT: str = "groq/llama-3.3-70b-versatile"
+REFLECTION_MAX_TOKENS: int = 2048
+JSON_REPORT_INDENT: int = 2
+
 EVAL_SPECS: list[tuple[str, Path, Path]] = [
     (
         "pmid",
