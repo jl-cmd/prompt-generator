@@ -36,3 +36,25 @@ class TestReflectionSystemPromptHardening:
         assert "https://docs.anthropic.com/en/docs/claude-code/skills" in system_prompt_text
         assert "https://docs.anthropic.com/en/docs/claude-code/hooks" in system_prompt_text
         assert "https://docs.anthropic.com/en/docs/claude-code/sub-agents" in system_prompt_text
+
+    def test_should_use_positive_directives_only(self) -> None:
+        system_prompt_text = eval_runner.REFLECTION_SYSTEM_PROMPT.lower()
+        assert "do not " not in system_prompt_text
+        assert "don't " not in system_prompt_text
+
+
+class TestVerdictColorsInlined:
+    """Color escape codes live inside VERDICT_COLORS, not as separate file-global constants."""
+
+    def test_should_not_expose_ansi_color_name_constants(self) -> None:
+        assert not hasattr(eval_runner, "ANSI_GREEN")
+        assert not hasattr(eval_runner, "ANSI_RED")
+        assert not hasattr(eval_runner, "ANSI_YELLOW")
+
+    def test_should_keep_ansi_reset_for_cross_module_use(self) -> None:
+        assert eval_runner.ANSI_RESET == "\033[0m"
+
+    def test_verdict_colors_should_map_to_escape_codes_directly(self) -> None:
+        assert eval_runner.VERDICT_COLORS["PASS"] == "\033[32m"
+        assert eval_runner.VERDICT_COLORS["FAIL"] == "\033[31m"
+        assert eval_runner.VERDICT_COLORS["SKIP"] == "\033[33m"

@@ -102,25 +102,41 @@ You are a prompt-engineering diagnostic assistant. You read one failing eval
 check and the current skill source, then propose the SMALLEST possible edit
 to the skill source that would have made the check pass.
 
-ANTI-HALLUCINATION RULES (non-negotiable):
+GROUNDING PROTOCOL — follow each step in order:
 
-1. Ground every edit in a citable source. Valid sources are:
-   - The CURRENT SKILL SOURCE text shown in the user message (cite by quoting
-     the exact line you are changing).
-   - Official Claude Code / Anthropic documentation at these canonical URLs:
-       * https://docs.anthropic.com/en/docs/claude-code/skills
-       * https://docs.anthropic.com/en/docs/claude-code/hooks
-       * https://docs.anthropic.com/en/docs/claude-code/sub-agents
-       * https://docs.anthropic.com/en/docs/claude-code/slash-commands
-       * https://docs.anthropic.com/en/docs/claude-code/settings
+Step 1. Gather evidence before drafting.
+   For every change you plan to make, collect at least one citation from
+   one of these two allowed sources:
+     (a) CURRENT SKILL SOURCE (the skill text shown in the user message).
+         Cite by copying the relevant line verbatim.
+     (b) One of these canonical Claude Code documentation URLs:
+         * https://docs.anthropic.com/en/docs/claude-code/skills
+         * https://docs.anthropic.com/en/docs/claude-code/hooks
+         * https://docs.anthropic.com/en/docs/claude-code/sub-agents
+         * https://docs.anthropic.com/en/docs/claude-code/slash-commands
+         * https://docs.anthropic.com/en/docs/claude-code/settings
 
-2. If you cannot ground the edit in one of those sources, respond with
-   "NO EDIT" and one sentence explaining what is missing. Do not guess.
-   Do not invent flags, fields, hook names, or skill conventions.
+Step 2. Use only identifiers that appear in those sources.
+   Every flag name, YAML frontmatter key, hook event, tool name, and
+   skill convention in your edit must appear character-for-character in
+   CURRENT SKILL SOURCE or one of the canonical URLs above. Copy these
+   identifiers by hand from the source text to prevent drift.
 
-3. Quote the exact text you are removing. The "---" side of the diff must be
-   a verbatim substring of the CURRENT SKILL SOURCE. If it is not, respond
-   with "NO EDIT".
+Step 3. Write the `---` side of the diff by copying.
+   Locate the exact line(s) in CURRENT SKILL SOURCE that you want to
+   change. Copy them verbatim onto the `---` side of the unified diff.
+   Place the replacement on the `+++` side.
+
+Step 4. Verify before sending.
+   Re-read your PROPOSED EDIT against CURRENT SKILL SOURCE. Confirm that
+   every `---` line is present verbatim in CURRENT SKILL SOURCE and
+   every identifier on the `+++` side traces back to a citation.
+
+Step 5. Use the `NO EDIT` response when evidence is missing.
+   Format: `NO EDIT: <one-sentence description of the missing evidence>`.
+   Choose this response whenever Step 1, Step 2, or Step 3 cannot be
+   completed from the allowed sources alone. Treat `NO EDIT` as a
+   first-class valid answer.
 
 Respond in this exact shape:
 
@@ -134,8 +150,8 @@ The --- lines must be verbatim from CURRENT SKILL SOURCE.>
 
 CITATIONS:
 <one bullet per source backing this edit: either a verbatim quote from
-CURRENT SKILL SOURCE, or one of the canonical doc URLs listed above. At
-least one citation is required unless the response is "NO EDIT".>
+CURRENT SKILL SOURCE, or one of the canonical doc URLs listed above.
+Include at least one citation, or respond "NO EDIT" per Step 5.>
 
 RISK:
 <one sentence noting what else this edit could affect>\
@@ -156,15 +172,12 @@ EVAL_SPECS: list[tuple[str, Path, Path]] = [
 
 VERDICT_ICONS: dict[str, str] = {"PASS": "✓", "FAIL": "✗", "SKIP": "○"}
 
-ANSI_GREEN: str = "\033[32m"
-ANSI_RED: str = "\033[31m"
-ANSI_YELLOW: str = "\033[33m"
 ANSI_RESET: str = "\033[0m"
 
 VERDICT_COLORS: dict[str, str] = {
-    "PASS": ANSI_GREEN,
-    "FAIL": ANSI_RED,
-    "SKIP": ANSI_YELLOW,
+    "PASS": "\033[32m",
+    "FAIL": "\033[31m",
+    "SKIP": "\033[33m",
 }
 
 XML_FENCE_OPEN_PREFIXES: tuple[str, ...] = ("```xml", "``` xml")
