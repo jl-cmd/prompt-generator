@@ -1,0 +1,12 @@
+{
+  "skills": ["pmax"],
+  "query": "/pmax build a prompt for a code reviewer agent that catches DRY violations",
+  "files": [],
+  "expected_behavior": [
+    "Every AskUserQuestion question text is written in third person; the skill never addresses the user as 'you' in the question body.",
+    "Every option description is written in third person.",
+    "The skill never uses hedging words (plausibly, maybe, probably, could) in its own output.",
+    "The skill never issues an AskUserQuestion with fewer than 2 options or more than 4 options.",
+    "The skill never uses context-dependent shorthand (for example, 'Option B') in permanent artifacts such as the ledger, Outcome digest, or final XML."
+  ]
+}

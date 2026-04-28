@@ -1,0 +1,12 @@
+{
+  "skills": ["pmax"],
+  "query": "/pmax build a prompt for adding a new API endpoint that returns user preferences",
+  "files": [],
+  "expected_behavior": [
+    "The skill does not add workflow steps the user did not approve (for example, file-confirmation steps that were not elicited).",
+    "The skill states external integrations correctly (outbound handoff direction, validator script invocation path, reuse references).",
+    "The skill refuses to emit the final XML if any XML section lacks a backing ledger entry.",
+    "Before issuing a new AskUserQuestion, the skill checks the existing ledger to confirm the answer is not already recorded.",
+    "If the skill tries to add a section, step, or tag with no ledger backing, Phase 3 validation fails and the skill returns to Phase 2."
+  ]
+}

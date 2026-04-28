@@ -1,0 +1,12 @@
+{
+  "skills": ["pmax"],
+  "query": "/pmax build a prompt for generating weekly status reports from a bug tracker",
+  "files": [],
+  "expected_behavior": [
+    "Every clarifying question goes through AskUserQuestion. No free-text questions appear in chat.",
+    "Chat text between rounds contains only ledger entries and sample artifacts. No explanations, no context, no commentary.",
+    "The skill never issues an AskUserQuestion with more than 4 options (schema cap).",
+    "The skill never places context, background, or explanation in chat text before or after an AskUserQuestion; all such content lives inside the question body and option descriptions.",
+    "Sample artifacts (rendered XML, example prompt output) may appear in chat because the sample is the subject of a decision."
+  ]
+}

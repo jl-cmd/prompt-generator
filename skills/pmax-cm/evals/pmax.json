@@ -1,0 +1,107 @@
+{
+  "skill_name": "pmax",
+  "source": "aggregated from skills/pmax/evaluations/*.json",
+  "evals": [
+    {
+      "id": 1,
+      "name": "askuserquestion_usage",
+      "scenario": "/pmax build a prompt for generating weekly status reports from a bug tracker",
+      "prompt": "/pmax build a prompt for generating weekly status reports from a bug tracker",
+      "files": [],
+      "expected_behavior": [
+        "Every clarifying question goes through AskUserQuestion. No free-text questions appear in chat.",
+        "Chat text between rounds contains only ledger entries and sample artifacts. No explanations, no context, no commentary.",
+        "The skill never issues an AskUserQuestion with more than 4 options (schema cap).",
+        "The skill never places context, background, or explanation in chat text before or after an AskUserQuestion; all such content lives inside the question body and option descriptions.",
+        "Sample artifacts (rendered XML, example prompt output) may appear in chat because the sample is the subject of a decision."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "db_schema_migration",
+      "scenario": "/pmax build a prompt for migrating the theme_db schema so new entries add a theme_db_id primary key and content_id becom",
+      "prompt": "/pmax build a prompt for migrating the theme_db schema so new entries add a theme_db_id primary key and content_id becomes nullable, with a backfill for existing rows",
+      "files": [
+        "Y:/Projects/theme_db/schema.sql"
+      ],
+      "expected_behavior": [
+        "Phase 0 silently reads schema.sql and identifies tables affected before any AskUserQuestion fires.",
+        "Phase 2 asks about schema changes in hierarchical rounds where a parent decision spawns child decisions (e.g. chosen primary key type spawns follow-up about backfill strategy).",
+        "Every AskUserQuestion option uses plain language; any technical term includes a plain-language explanation in the description.",
+        "The final XML contains an <!-- E#.# --> HTML comment before every sentence, with no sentence missing a backing entry.",
+        "No XML section appears in the final prompt unless at least one ledger entry populated it.",
+        "The Outcome preview bullets in Phase 5 mention every ledger entry present at end of Phase 4."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "plain_language",
+      "scenario": "/pmax build a prompt for an agent that manages NULLABLE foreign keys with ON DELETE CASCADE behavior",
+      "prompt": "/pmax build a prompt for an agent that manages NULLABLE foreign keys with ON DELETE CASCADE behavior",
+      "files": [],
+      "expected_behavior": [
+        "Every AskUserQuestion question text uses plain words a non-expert can read.",
+        "Every AskUserQuestion option label uses plain words; technical terms in labels are reserved for cases where no plain alternative exists.",
+        "Every option whose label contains a technical term includes a plain-language explanation in the description.",
+        "The skill never uses hedging words (plausibly, maybe, probably, could) in its own questions or descriptions.",
+        "Validator fails and returns to Phase 2 if any AskUserQuestion field contains a banned jargon word without plain-language accompaniment."
+      ]
+    },
+    {
+      "id": 4,
+      "name": "preview_completeness",
+      "scenario": "/pmax build a prompt for generating release notes from a list of merged pull requests",
+      "prompt": "/pmax build a prompt for generating release notes from a list of merged pull requests",
+      "files": [],
+      "expected_behavior": [
+        "Every ledger entry that exists at the end of Phase 4 is represented in at least one Phase 5 preview bullet.",
+        "The four preview bullets (What it does, Key inputs, Done when, Quick sample) stay under 20 lines total.",
+        "The Quick sample bullet shows real executor output, not a description of what the output would be.",
+        "If preview coverage fails (an entry is silently dropped), the skill reports which entries are missing and returns to Phase 4 for re-assembly.",
+        "The Ship option is always listed first in the Phase 5 AskUserQuestion with the label (Recommended)."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "scope_discipline",
+      "scenario": "/pmax build a prompt for adding a new API endpoint that returns user preferences",
+      "prompt": "/pmax build a prompt for adding a new API endpoint that returns user preferences",
+      "files": [],
+      "expected_behavior": [
+        "The skill does not add workflow steps the user did not approve (for example, file-confirmation steps that were not elicited).",
+        "The skill states external integrations correctly (outbound handoff direction, validator script invocation path, reuse references).",
+        "The skill refuses to emit the final XML if any XML section lacks a backing ledger entry.",
+        "Before issuing a new AskUserQuestion, the skill checks the existing ledger to confirm the answer is not already recorded.",
+        "If the skill tries to add a section, step, or tag with no ledger backing, Phase 3 validation fails and the skill returns to Phase 2."
+      ]
+    },
+    {
+      "id": 6,
+      "name": "tiny_rename",
+      "scenario": "/pmax prompt for renaming calc_total to compute_cart_total across the codebase",
+      "prompt": "/pmax prompt for renaming calc_total to compute_cart_total across the codebase",
+      "files": [],
+      "expected_behavior": [
+        "Skill asks 3 or fewer questions total across all Phase 2 rounds.",
+        "Skill does not spawn sub-questions on unrelated dimensions (no tone, no style, no persona questions for a rename task).",
+        "The final XML is under 30 lines.",
+        "Phase 2 ends automatically once required sections have entries; the skill does not keep asking after coverage is detected.",
+        "Every sentence in the final XML has a backing <!-- E#.# --> comment."
+      ]
+    },
+    {
+      "id": 7,
+      "name": "writing_mechanics",
+      "scenario": "/pmax build a prompt for a code reviewer agent that catches DRY violations",
+      "prompt": "/pmax build a prompt for a code reviewer agent that catches DRY violations",
+      "files": [],
+      "expected_behavior": [
+        "Every AskUserQuestion question text is written in third person; the skill never addresses the user as 'you' in the question body.",
+        "Every option description is written in third person.",
+        "The skill never uses hedging words (plausibly, maybe, probably, could) in its own output.",
+        "The skill never issues an AskUserQuestion with fewer than 2 options or more than 4 options.",
+        "The skill never uses context-dependent shorthand (for example, 'Option B') in permanent artifacts such as the ledger, Outcome digest, or final XML."
+      ]
+    }
+  ]
+}

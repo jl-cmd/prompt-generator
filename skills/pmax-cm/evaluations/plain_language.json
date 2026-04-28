@@ -1,0 +1,12 @@
+{
+  "skills": ["pmax"],
+  "query": "/pmax build a prompt for an agent that manages NULLABLE foreign keys with ON DELETE CASCADE behavior",
+  "files": [],
+  "expected_behavior": [
+    "Every AskUserQuestion question text uses plain words a non-expert can read.",
+    "Every AskUserQuestion option label uses plain words; technical terms in labels are reserved for cases where no plain alternative exists.",
+    "Every option whose label contains a technical term includes a plain-language explanation in the description.",
+    "The skill never uses hedging words (plausibly, maybe, probably, could) in its own questions or descriptions.",
+    "Validator fails and returns to Phase 2 if any AskUserQuestion field contains a banned jargon word without plain-language accompaniment."
+  ]
+}
