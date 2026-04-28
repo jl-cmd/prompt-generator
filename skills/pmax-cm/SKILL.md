@@ -1,6 +1,6 @@
 ---
-name: pmax
-description: Builds prompts decision by decision. Asks structured multiple-choice questions in small rounds, posts each approved answer as a tagged line in chat, then assembles the final prompt only from those tagged lines so nothing unapproved is added. Use when the user wants a prompt built piece by piece without re-reading drafts. Triggers: '/pmax', 'build a prompt with me', 'pmax', 'incremental prompt builder'.
+name: pmax-cm
+description: Caveman-trimmed variant of pmax. Builds prompts decision by decision. Asks structured multiple-choice questions in small rounds, posts each approved answer as a tagged line in chat, then assembles the final prompt only from those tagged lines so nothing unapproved is added. Use when the user wants a prompt built piece by piece without re-reading drafts. Triggers: '/pmax-cm', 'pmax-cm', 'caveman pmax', 'trimmed pmax'.
 ---
 
 # pmax
