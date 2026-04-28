@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.9.0](https://github.com/jl-cmd/prompt-generator/compare/v1.8.0...v1.9.0) (2026-04-28)
+
+
+### Features
+
+* dual-runtime capture harness for skill evals ([#44](https://github.com/jl-cmd/prompt-generator/issues/44)) ([9bcbbba](https://github.com/jl-cmd/prompt-generator/commit/9bcbbbae35bd789ead4dfa3254465a16488fc43c))
+* **eval_runner:** wire agent-prompt, prompt-generator, and pmax into EVAL_SPECS ([#41](https://github.com/jl-cmd/prompt-generator/issues/41)) ([1fdde45](https://github.com/jl-cmd/prompt-generator/commit/1fdde45ef34e7af75b0227d556d81a3089f6870c))
+* **evals:** capture baseline outputs for agent-prompt, prompt-generator, pmax ([#43](https://github.com/jl-cmd/prompt-generator/issues/43)) ([e9daccf](https://github.com/jl-cmd/prompt-generator/commit/e9daccff88965a345aa24b8c71fc52b9e230f6fc))
+* **skills:** add pmax-cm — caveman-trimmed sibling of pmax ([8284d96](https://github.com/jl-cmd/prompt-generator/commit/8284d965412527df760b02b6b0d4ea50341f2c22))
+* **skills:** add pmax-cm — caveman-trimmed sibling of pmax ([4f70693](https://github.com/jl-cmd/prompt-generator/commit/4f706933011a99e07de4fb881a3e990f3c560fa3))
+
+
+### Bug Fixes
+
+* **pmax-cm:** rename skill to pmax-cm so /pmax-cm resolves ([c5c61e8](https://github.com/jl-cmd/prompt-generator/commit/c5c61e87cf425ddae71e5e599354f3393b519357))
+
 ## [1.8.0](https://github.com/jl-cmd/prompt-generator/compare/v1.7.0...v1.8.0) (2026-04-20)
 
 
