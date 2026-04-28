@@ -1,0 +1,12 @@
+{
+  "skills": ["pmax"],
+  "query": "/pmax build a prompt for generating release notes from a list of merged pull requests",
+  "files": [],
+  "expected_behavior": [
+    "Every ledger entry that exists at the end of Phase 4 is represented in at least one Phase 5 preview bullet.",
+    "The four preview bullets (What it does, Key inputs, Done when, Quick sample) stay under 20 lines total.",
+    "The Quick sample bullet shows real executor output, not a description of what the output would be.",
+    "If preview coverage fails (an entry is silently dropped), the skill reports which entries are missing and returns to Phase 4 for re-assembly.",
+    "The Ship option is always listed first in the Phase 5 AskUserQuestion with the label (Recommended)."
+  ]
+}
