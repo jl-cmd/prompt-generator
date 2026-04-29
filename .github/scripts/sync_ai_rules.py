@@ -18,12 +18,12 @@ from typing import Optional, TypedDict
 SYNC_HEADER_START_MARKER = "<!-- SYNC-HEADER-START -->"
 SYNC_HEADER_END_MARKER = "<!-- SYNC-HEADER-END -->"
 DESTINATION_PATHS: tuple[str, ...] = (
-    ".github/copilot-instructions.md",
+    "AGENTS.md",
     ".cursor/BUGBOT.md",
 )
 OPT_OUT_SENTINEL_PATH = ".github/sync-ai-rules.optout"
 SOURCE_REPO = "jl-cmd/claude-code-config"
-SOURCE_FILE_PATH = ".github/copilot-instructions.md"
+SOURCE_FILE_PATH = "AGENTS.md"
 LISTENER_WORKFLOW_RELATIVE_PATH = ".github/workflows/sync-ai-rules.yml"
 RAW_GITHUB_CONTENT_BASE_URL = "https://raw.githubusercontent.com"
 DEFAULT_SOURCE_BRANCH = "main"
